@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>נמל אשדוד | מעקב חירום</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --card: #111827;
+    --card2: #1a2235;
+    --border: #1e2d45;
+    --accent: #f97316;
+    --accent2: #ef4444;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --text: #f1f5f9;
+    --muted: #64748b;
+    --present: #14532d;
+    --present-border: #22c55e;
+    --absent: #450a0a;
+    --absent-border: #ef4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 24px rgba(249,115,22,0.2);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .logo-text h1 { font-size: 16px; font-weight: 900; letter-spacing: -0.5px; }
+  .logo-text p { font-size: 11px; color: var(--muted); }
+
+  .date-time {
+    text-align: left;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .date-time strong { color: var(--accent); font-size: 13px; }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .stat {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 8px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .stat-num { font-size: 22px; font-weight: 900; line-height: 1; }
+  .stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .stat.total .stat-num { color: var(--text); }
+  .stat.present .stat-num { color: var(--green); }
+  .stat.absent .stat-num { color: var(--accent2); }
+  .stat.unknown .stat-num { color: var(--yellow); }
+
+  /* Progress bar */
+  .progress-wrap {
+    background: var(--border);
+    border-radius: 4px;
+    height: 6px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), #86efac);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  /* Search & filters */
+  .controls {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .search-box {
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px 12px 44px;
+    color: var(--text);
+    font-family: 'Heebo', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-box input:focus { border-color: var(--accent); }
+  .search-icon {
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  .filter-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .filter-tabs::-webkit-scrollbar { display: none; }
+  .filter-tab {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    font-family: 'Heebo', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .filter-tab.active { background: var(--accent); border-color: var(--accent); color: white; font-weight: 700; }
+  .filter-tab.green.active { background: var(--green); border-color: var(--green); }
+  .filter-tab.red.active { background: var(--accent2); border-color: var(--accent2); }
+
+  /* Contractor sections */
+  .contractor-section {
+    margin: 0 12px 12px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .contractor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .contractor-header:active { opacity: 0.8; }
+  .contractor-left { display: flex; align-items: center; gap: 10px; }
+  .contractor-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .contractor-name { font-size: 14px; font-weight: 700; }
+  .contractor-meta { font-size: 11px; color: var(--muted); }
+  .contractor-right { display: flex; align-items: center; gap: 8px; }
+  .mini-stat {
+    display: flex; align-items: center; gap: 3px;
+    font-size: 12px; font-weight: 700;
+  }
+  .mini-stat.g { color: var(--green); }
+  .mini-stat.r { color: var(--accent2); }
+  .chevron { color: var(--muted); transition: transform 0.3s; font-size: 14px; }
+  .chevron.open { transform: rotate(180deg); }
+
+  .workers-list {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+  }
+  .workers-list.open { display: flex; }
+
+  /* Worker row */
+  .worker-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--card2);
+    transition: background 0.15s;
+  }
+  .worker-row.present { background: rgba(34,197,94,0.08); border-right: 3px solid var(--green); }
+  .worker-row.absent { background: rgba(239,68,68,0.08); border-right: 3px solid var(--accent2); }
+
+  .worker-info { flex: 1; min-width: 0; }
+  .worker-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .worker-phone { font-size: 11px; color: var(--muted); direction: ltr; }
+  .worker-note { font-size: 10px; color: var(--yellow); margin-top: 1px; }
+
+  .btn-group { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-check {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    border: 2px solid;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-check:active { transform: scale(0.9); }
+  .btn-yes { border-color: var(--green); color: var(--green); }
+  .btn-yes.active { background: var(--green); color: white; }
+  .btn-no { border-color: var(--accent2); color: var(--accent2); }
+  .btn-no.active { background: var(--accent2); color: white; }
+
+  .call-btn {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s;
+  }
+  .call-btn:active { background: var(--border); }
+
+  /* Export button */
+  .export-wrap {
+    padding: 16px;
+    display: flex;
+    gap: 10px;
+  }
+  .export-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    font-family: 'Heebo', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .export-btn:active { transform: scale(0.97); }
+  .btn-report { background: var(--accent); color: white; }
+  .btn-reset { background: var(--card); color: var(--muted); border: 1px solid var(--border); }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 24px 20px 40px;
+    border-top: 2px solid var(--accent);
+  }
+  .modal h2 { font-size: 18px; font-weight: 900; margin-bottom: 6px; }
+  .modal .sub { color: var(--muted); font-size: 12px; margin-bottom: 20px; }
+  .report-line {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .report-line:last-child { border-bottom: none; }
+  .report-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 12px 0 4px;
+  }
+  .badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge.p { background: rgba(34,197,94,0.2); color: var(--green); }
+  .badge.a { background: rgba(239,68,68,0.2); color: var(--accent2); }
+  .badge.u { background: rgba(234,179,8,0.2); color: var(--yellow); }
+  .modal-close {
+    width: 100%; padding: 14px;
+    background: var(--border); border: none; border-radius: 12px;
+    color: var(--text); font-family: 'Heebo', sans-serif;
+    font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 20px;
+  }
+
+  .btn-ok { border-color: #16a34a; color: #16a34a; font-size: 16px; }
+  .btn-ok.active { background: linear-gradient(135deg,#15803d,#22c55e); border-color: #22c55e; color: white; box-shadow: 0 0 10px rgba(34,197,94,0.5); }
+
+  .ok-badge {
+    font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 20px;
+    background: linear-gradient(135deg,#14532d,#166534);
+    color: #4ade80; border: 1px solid #22c55e;
+    white-space: nowrap; display: none; letter-spacing: 0.3px;
+  }
+  .ok-badge.show { display: inline-block; }
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-icon">⚠️</div>
+      <div class="logo-text">
+        <h1>נמל אשדוד — חירום</h1>
+        <p>שינוע אשדוד | מעקב נוכחות</p>
+      </div>
+    </div>
+    <div class="date-time" id="datetime"></div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat total"><div class="stat-num" id="s-total">0</div><div class="stat-label">סה"כ</div></div>
+    <div class="stat present"><div class="stat-num" id="s-present">0</div><div class="stat-label">נוכחים ✓</div></div>
+    <div class="stat absent"><div class="stat-num" id="s-absent">0</div><div class="stat-label">חסרים ✗</div></div>
+    <div class="stat unknown"><div class="stat-num" id="s-unknown">0</div><div class="stat-label">לא ידוע</div></div>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+</div>
+
+<div class="controls">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="חיפוש שם או טלפון..." oninput="filterWorkers()">
+  </div>
+  <div class="filter-tabs">
+    <button class="filter-tab active" onclick="setFilter('all',this)">הכל</button>
+    <button class="filter-tab green" onclick="setFilter('present',this)">נוכחים</button>
+    <button class="filter-tab red" onclick="setFilter('absent',this)">חסרים</button>
+    <button class="filter-tab" onclick="setFilter('unknown',this)">לא סומן</button>
+  </div>
+</div>
+
+<div id="contractors-container"></div>
+
+<div class="export-wrap">
+  <button class="export-btn btn-report" onclick="openReport()">📋 הצג דוח מלא</button>
+  <button class="export-btn btn-reset" onclick="resetAll()">🔄 איפוס</button>
+</div>
+
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <h2>📋 דוח נוכחות חירום</h2>
+    <div class="sub" id="report-time"></div>
+    <div id="report-body"></div>
+    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">סגור</button>
+  </div>
+</div>
+
+<script>
+const contractors = [
+  {
+    name: "מתכת דביר",
+    color: "#3b82f6",
+    workers: [
+      {name:"סלבה פוזדינאקוב", phone:"050-2770614"},
+      {name:"סרגייי פוזיאנקוב", phone:"054-6810072"},
+      {name:"אמיר קרנדיאן", phone:"050-5169441"},
+      {name:"משה יצחק", phone:"054-6417063"},
+      {name:"חיים פרץ", phone:"054-5270502"},
+      {name:"בנימין אטיאס", phone:"052-8231958"},
+      {name:"אלי גרבי", phone:"053-7234166"},
+      {name:"אנדרייי ירוקוב", phone:"054-5261305"},
+      {name:"אמיר וקנין", phone:"050-2888833"},
+      {name:"אולג פרפל", phone:"050-3049519"},
+      {name:"ארתור שטיינברג", phone:"053-2248941"},
+      {name:"חיים מלכה", phone:"052-6558653"},
+      {name:"שראל שלום", phone:"053-5310901"},
+      {name:"יצחק מור", phone:"054-6220770"},
+      {name:"דניאל גוטמן", phone:"054-3520676"},
+      {name:"רומן קרשינבאום", phone:"549403177"},
+    ]
+  },
+  {
+    name: "תנועה בדרך",
+    color: "#8b5cf6",
+    workers: [
+      {name:"מיכאל אשטון", phone:"050-4868384", note:"מנהל"},
+      {name:"אלכסיי מרטינגנקו", phone:"052-6082818"},
+      {name:"יעקב כהן", phone:"050-3681010"},
+      {name:"עמוס פרג'ון", phone:"0509350043"},
+      {name:"אלכס סהר דן", phone:"052-2210080"},
+      {name:"רזבאן אנדריי", phone:"054-6975577"},
+      {name:"רוברט בגדסרוב", phone:"054-5279373"},
+      {name:"איברהים אבו סלוב", phone:"050-9279343"},
+      {name:"נאסר אבו סלוב", phone:"050-5878144"},
+      {name:"עלי אבו סלוב", phone:"054-4462968"},
+      {name:"עטיה אבו סלוב", phone:"052-7576532"},
+      {name:"יונס אבו סלוב", phone:"052-6964306"},
+      {name:"פואז אבו סלוב", phone:"050-8475545"},
+      {name:"ראשד אבו סלוב", phone:"050-9239820"},
+      {name:"פאדי אבו סלוב", phone:"052-6728314"},
+      {name:"עודה אבו סלוב", phone:"054-7439862"},
+      {name:"מרעי הוואשלה", phone:"050-4844492"},
+      {name:"ולדימיר פוסטינסקי", phone:"052-7014133", note:"שישי/שבת/חגים"},
+      {name:"דניס גרינצביץ", phone:"050-4391451", note:"שישי/שבת/חגים"},
+    ]
+  },
+  {
+    name: "ברביביי דוד",
+    color: "#f59e0b",
+    workers: [
+      {name:"ברביביי דוד", phone:"0537730958", note:"מנהל עבודה"},
+      {name:"אבו סריחן נאסר", phone:"0522629205", note:"מסגר"},
+      {name:"יפרח שי", phone:"0523331841"},
+      {name:"אבו עאייש תארק", phone:"0524566451", note:"מסגר"},
+      {name:"מליאנקר פנחס", phone:"0548150956", note:"חשמלאי"},
+      {name:"רובינוב ישי", phone:"0545727096", note:"מסגר"},
+    ]
+  },
+  {
+    name: "גסקו",
+    color: "#10b981",
+    workers: [
+      {name:"דוד זוזוט", phone:"053-5209824"},
+      {name:"אפריים בנאי", phone:"054-3492310"},
+      {name:"מאיר ברבי", phone:"053-8335917"},
+      {name:"רפאל זוזוט", phone:"053-8276638"},
+    ]
+  },
+  {
+    name: "א.ד סינון",
+    color: "#ef4444",
+    workers: [
+      {name:"אלדד בן אבו", phone:"052-689-9939"},
+      {name:"עזרא גזאי", phone:"054-5639572"},
+      {name:"יואל רחמים", phone:"050-9230526", note:"עובד מחליף"},
+    ]
+  },
+  {
+    name: "תנועה בדרך (חשמלאי הבק)",
+    color: "#a78bfa",
+    workers: [
+      {name:"שי סיביליה", phone:"050-3434207"},
+      {name:"לוין דניאל", phone:"053-3088485"},
+      {name:"ריחניאן אברהם", phone:"050-6448531"},
+      {name:"דרעי יוסי", phone:"052-6441539"},
+      {name:"פלג לירון", phone:"053-4222190"},
+      {name:"דהן שלומי", phone:"054-4988057"},
+      {name:"קדוש מישל", phone:"053-3373769"},
+      {name:"ריטון נסים", phone:"050-5202072"},
+      {name:"קרוגלוב יורי", phone:""},
+      {name:"שבדוב ולדימיר", phone:""},
+      {name:"שיר סלומון", phone:"054-8074840"},
+      {name:"בכר עמיקם", phone:"0507277499"},
+      {name:"אבו סולב ראיד", phone:""},
+      {name:"משה סויסא", phone:"054-5650809"},
+      {name:"ניק בויצנקו", phone:"052-6870058"},
+      {name:"אורי אלפסי", phone:"050-7914940"},
+      {name:"אלי מנצור", phone:"052-7586166", note:"מנוף"},
+      {name:"גל לוי", phone:"055-6624042"},
+      {name:"אריה פרידמן", phone:"054-9797236"},
+    ]
+  },
+  {
+    name: "אל-מור (חשמל)",
+    color: "#ec4899",
+    workers: [
+      {name:"חמים כהן", phone:"052-5987369"},
+      {name:"שמעון בן ישי", phone:"054-5514030"},
+      {name:"משה אדגו", phone:"052-3802171"},
+      {name:"אבירן בן סירא", phone:"054-8010645"},
+      {name:"ברהנו אורי טקא", phone:"050-8356872"},
+      {name:"אלכסנדר וינר", phone:"050-8356872"},
+    ]
+  },
+  {
+    name: "אתר תעבורה",
+    color: "#06b6d4",
+    workers: [
+      {name:"דוד זהבי", phone:"054-7912560", note:"איש קשר חירום"},
+      {name:"רפי עזרא", phone:"054-7912515"},
+      {name:"ואדי רמזי", phone:"053-9225050"},
+      {name:"מוחמד סוואעד", phone:"052-5821465"},
+      {name:"להב פואז", phone:"050-2230955"},
+      {name:"ניסים סוואעד", phone:"052-4663519"},
+      {name:"רובין ברזס", phone:"058-5690115"},
+      {name:"זיאד טארק", phone:"054-5310920"},
+      {name:"חן אשכנזי", phone:"050-8282836"},
+      {name:"נריה יחזקאל", phone:"053-4811731"},
+      {name:"סעיד אלרומלי", phone:"052-7009407", note:"קבלן"},
+      {name:"עומר אלרומלי", phone:"052-7005862", note:"קבלן"},
+    ]
+  },
+  {
+    name: "אמקו ים",
+    color: "#f97316",
+    workers: [
+      {name:"טטרואשוילי ממוקה", phone:"053-2445512"},
+      {name:"כהן יעקב", phone:"050-9310605"},
+      {name:"תורגמן חן", phone:"053-3605535"},
+      {name:"בן שועה יוסף", phone:"053-7679232"},
+      {name:"אזרוב גנאדי", phone:"052-6606204"},
+      {name:"מור בני", phone:"052-7309005"},
+      {name:"כהן יצחק", phone:"050-4214227"},
+      {name:"לייב חברט", phone:"054-6433593"},
+      {name:"טטרואשוילי שלום", phone:"053-7168889"},
+      {name:"גולדפרב מריאנה", phone:"053-7224946"},
+      {name:"אבוטבול מאיר עמוס", phone:"052-8890769"},
+      {name:"ג'ין יוסי", phone:"052-3625354"},
+      {name:"תורגמן מאיר", phone:"050-2213337"},
+      {name:"ענאני מור מרדכי", phone:"050-9308602"},
+      {name:"מוצה אסצלו", phone:"054-7225309"},
+    ]
+  },
+  {
+    name: "כיל (ICL) - עובדי חברה",
+    color: "#dc2626",
+    workers: [
+      {name:"שחר דניאלי", phone:"052-4897643"},
+      {name:"רמי וייס", phone:"052-3434278"},
+      {name:"מירב אלפסי", phone:"050-9536882"},
+      {name:"רונן אברהם", phone:"052-4420927"},
+      {name:"שלמה בונן", phone:"052-6768326"},
+      {name:"שאול דניאל", phone:"052-3927172"},
+      {name:"משה עובדיה", phone:"052-6029626"},
+      {name:"ליאור יצחקי", phone:"052-5686682"},
+      {name:"חניה צנגאוקר", phone:"054-3370184"},
+      {name:"דני אויזרט", phone:"050-5814911"},
+      {name:"מאיר חזן", phone:"054-7330753"},
+      {name:"אבירז אבלחק", phone:"054-9115???"},
+      {name:"יורם אוזונה", phone:"052-3948925"},
+      {name:"שי חיימוביץ", phone:"050-2252062"},
+
+      {name:"עומרי מלול", phone:"050-7607570"},
+      {name:"אילן חסון", phone:"052-4679834"},
+      {name:"תומר חזן", phone:"050-8668904"},
+      {name:"ניב אנקונינה", phone:"052-5355858"},
+      {name:"אמין אלסייד", phone:"054-9261660"},
+      {name:"אורן פרנפס", phone:"052-2805160"},
+    ]
+  },
+  {
+    name: "ברנאש",
+    color: "#16a34a",
+    workers: [
+      {name:"כפיר לוי", phone:"050-4660550"},
+      {name:"אלי דרעי", phone:"053-8325059"},
+      {name:"יקיר דרעי", phone:"050-4312540"},
+      {name:"יניב עמוס", phone:"055-5569033"},
+      {name:"גלה שוביטיזה", phone:"058-4666684"},
+      {name:"רונן עזרן", phone:"052-6925695"},
+      {name:"אלון סגל", phone:"052-2090033"},
+      {name:"מיכאל שטרן", phone:"054-6440498"},
+      {name:"דניאל מגרלשוילי", phone:"050-5986589"},
+      {name:"ליאור בן טולילה", phone:"052-7161100"},
+      {name:"ישראל טלקר", phone:"054-8836088"},
+      {name:"משה שמליקשוילי", phone:"050-7808944"},
+      {name:"אבי באייב", phone:"053-2382359"},
+      {name:"משה שמר", phone:"050-9349518"},
+      {name:"גיזת וורקא", phone:"058-6321374"},
+      {name:"ביסואס דיבויית", phone:"050-6320603"},
+    ]
+  },
+  {
+    name: "ברן",
+    color: "#1d4ed8",
+    workers: [
+      {name:"קין בדלוב",  phone:"054-7842947"},
+      {name:"נאור עזרא",  phone:"050-9139137"},
+      {name:"מתן לוי",    phone:"050-8580752"},
+      {name:"שמעון אלבז", phone:"054-5245163", note:"⚠️ איש קשר לחירום"},
+      {name:"יעקב נחום",  phone:"054-2769765"},
+      {name:"שאול יחיא",  phone:"054-2828273"},
+    ]
+  },
+  {
+    name: "עובדים נוספים",
+    color: "#64748b",
+    workers: [
+      {name:"אילן שלומאי", phone:"052-5553811"},
+      {name:"קלאודיו",     phone:"058-7047322"},
+    ]
+  },
+];
+
+// State: {workerKey: 'present'|'absent'|null}
+const state = {};
+const stateOk = {}; // סיום חירום - מצב תקין
+let currentFilter = 'all';
+
+function workerKey(cIdx, wIdx) { return `${cIdx}_${wIdx}`; }
+
+function updateStats() {
+  let total=0, present=0, absent=0;
+  contractors.forEach((c,ci) => c.workers.forEach((_,wi) => {
+    total++;
+    const s = state[workerKey(ci,wi)];
+    if(s==='present') present++;
+    else if(s==='absent') absent++;
+  }));
+  const unknown = total - present - absent;
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('s-present').textContent = present;
+  document.getElementById('s-absent').textContent = absent;
+  document.getElementById('s-unknown').textContent = unknown;
+  const pct = total > 0 ? Math.round(present/total*100) : 0;
+  document.getElementById('progress').style.width = pct + '%';
+  // Update section mini stats
+  contractors.forEach((c,ci) => {
+    let cp=0, ca=0;
+    c.workers.forEach((_,wi) => {
+      const s = state[workerKey(ci,wi)];
+      if(s==='present') cp++;
+      else if(s==='absent') ca++;
+    });
+    const el = document.getElementById(`section-stats-${ci}`);
+    if(el) el.innerHTML = `<span class="mini-stat g">✓${cp}</span><span class="mini-stat r">✗${ca}</span>`;
+  });
+}
+
+function toggleOk(ci, wi) {
+  const k = workerKey(ci, wi);
+  if(stateOk[k]) delete stateOk[k];
+  else stateOk[k] = true;
+  renderWorkerRow(ci, wi);
+}
+
+function toggle(ci, wi, val) {
+  const k = workerKey(ci,wi);
+  if(state[k]===val) delete state[k];
+  else state[k]=val;
+  renderWorkerRow(ci, wi);
+  updateStats();
+  filterWorkers();
+}
+
+function renderWorkerRow(ci, wi) {
+  const w = contractors[ci].workers[wi];
+  const k = workerKey(ci,wi);
+  const s = state[k];
+  const row = document.getElementById(`row-${ci}-${wi}`);
+  if(!row) return;
+  row.className = 'worker-row' + (s==='present'?' present':s==='absent'?' absent':'');
+  const btnY = row.querySelector('.btn-yes');
+  const btnN = row.querySelector('.btn-no');
+  if(btnY) btnY.className = 'btn-check btn-yes' + (s==='present'?' active':'');
+  if(btnN) btnN.className = 'btn-check btn-no' + (s==='absent'?' active':'');
+  const btnOk = row.querySelector('.btn-ok');
+  if(btnOk) btnOk.className = 'btn-check btn-ok' + (stateOk[k]?' active':'');
+  const okBadge = row.querySelector('.ok-badge');
+  if(okBadge) okBadge.className = 'ok-badge' + (stateOk[k]?' show':'');
+}
+
+function buildUI() {
+  const container = document.getElementById('contractors-container');
+  container.innerHTML = '';
+  contractors.forEach((c, ci) => {
+    const section = document.createElement('div');
+    section.className = 'contractor-section';
+    section.id = `section-${ci}`;
+
+    section.innerHTML = `
+      <div class="contractor-header" onclick="toggleSection(${ci})">
+        <div class="contractor-left">
+          <div class="contractor-dot" style="background:${c.color}"></div>
+          <div>
+            <div class="contractor-name">${c.name}</div>
+            <div class="contractor-meta">${c.workers.length} עובדים</div>
+          </div>
+        </div>
+        <div class="contractor-right">
+          <div id="section-stats-${ci}" style="display:flex;gap:8px">
+            <span class="mini-stat g">✓0</span><span class="mini-stat r">✗0</span>
+          </div>
+          <span class="chevron" id="chevron-${ci}">▼</span>
+        </div>
+      </div>
+      <div class="workers-list open" id="list-${ci}"></div>
+    `;
+    container.appendChild(section);
+
+    const list = document.getElementById(`list-${ci}`);
+    c.workers.forEach((w, wi) => {
+      const row = document.createElement('div');
+      row.className = 'worker-row';
+      row.id = `row-${ci}-${wi}`;
+      row.dataset.name = w.name;
+      row.dataset.phone = w.phone || '';
+      row.dataset.ci = ci;
+      row.dataset.wi = wi;
+      const phoneLink = w.phone ? `<a class="call-btn" href="tel:${w.phone}">📞</a>` : `<div class="call-btn" style="opacity:0.3">📞</div>`;
+      row.innerHTML = `
+        <div class="worker-info">
+          <div class="worker-name">${w.name}</div>
+          <div class="worker-phone">${w.phone || '—'}</div>
+          ${w.note ? `<div class="worker-note">${w.note}</div>` : ''}
+        </div>
+        <div class="btn-group">
+          <button class="btn-check btn-yes" onclick="toggle(${ci},${wi},'present')" title="נוכח">✓</button>
+          <button class="btn-check btn-no" onclick="toggle(${ci},${wi},'absent')" title="חסר">✗</button>
+          <button class="btn-check btn-ok" onclick="toggleOk(${ci},${wi})" title="מצב תקין בסיום חירום">🛡</button>
+          ${phoneLink}
+        </div>
+      `;
+      // add ok-badge inside worker-info
+      row.querySelector('.worker-info').insertAdjacentHTML('beforeend', '<span class="ok-badge">🛡 בטוח | מצב תקין</span>');
+      list.appendChild(row);
+    });
+  });
+  updateStats();
+}
+
+function toggleSection(ci) {
+  const list = document.getElementById(`list-${ci}`);
+  const chevron = document.getElementById(`chevron-${ci}`);
+  list.classList.toggle('open');
+  chevron.classList.toggle('open');
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  filterWorkers();
+}
+
+function filterWorkers() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  contractors.forEach((c, ci) => {
+    let anyVisible = false;
+    c.workers.forEach((w, wi) => {
+      const row = document.getElementById(`row-${ci}-${wi}`);
+      if(!row) return;
+      const k = workerKey(ci, wi);
+      const s = state[k] || 'unknown';
+      const matchFilter =
+        currentFilter==='all' ||
+        (currentFilter==='present' && s==='present') ||
+        (currentFilter==='absent' && s==='absent') ||
+        (currentFilter==='unknown' && !state[k]);
+      const matchSearch = !q || w.name.includes(q) || (w.phone||'').includes(q);
+      const show = matchFilter && matchSearch;
+      row.style.display = show ? '' : 'none';
+      if(show) anyVisible = true;
+    });
+    const section = document.getElementById(`section-${ci}`);
+    if(section) section.style.display = anyVisible ? '' : 'none';
+  });
+}
+
+function openReport() {
+  const now = new Date();
+  document.getElementById('report-time').textContent =
+    `תאריך: ${now.toLocaleDateString('he-IL')}  |  שעה: ${now.toLocaleTimeString('he-IL')}`;
+
+  let html = '';
+  let totalP=0, totalA=0, totalU=0;
+
+  contractors.forEach((c,ci) => {
+    let cp=[], ca=[], cu=[];
+    c.workers.forEach((w,wi) => {
+      const s = state[workerKey(ci,wi)];
+      if(s==='present') cp.push(w);
+      else if(s==='absent') ca.push(w);
+      else cu.push(w);
+    });
+    totalP+=cp.length; totalA+=ca.length; totalU+=cu.length;
+
+    html += `<div class="report-section-title" style="color:${c.color}">${c.name} (${c.workers.length})</div>`;
+    [...cp.map(w=>({w,s:'present'})), ...ca.map(w=>({w,s:'absent'})), ...cu.map(w=>({w,s:'unknown'}))].forEach(({w,s})=>{
+      html += `<div class="report-line">
+        <span>${w.name}</span>
+        <span style="display:flex;gap:6px;align-items:center">
+          <span class="badge ${s==='present'?'p':s==='absent'?'a':'u'}">${s==='present'?'נוכח':s==='absent'?'חסר':'?'}</span>
+          ${stateOk[workerKey(ci,wi)] ? '<span class="badge" style="background:linear-gradient(135deg,#14532d,#166534);color:#4ade80;border:1px solid #22c55e">🛡 בטוח</span>' : ''}
+        </span>
+      </div>`;
+    });
+  });
+
+  html = `<div class="report-line" style="font-weight:700;font-size:15px">
+    <span>סה"כ: ${totalP+totalA+totalU}</span>
+    <span><span style="color:#22c55e">✓${totalP}</span> &nbsp; <span style="color:#ef4444">✗${totalA}</span> &nbsp; <span style="color:#eab308">?${totalU}</span></span>
+  </div>` + html;
+
+  document.getElementById('report-body').innerHTML = html;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(e) {
+  if(e.target.id==='modal') document.getElementById('modal').classList.remove('open');
+}
+
+function resetAll() {
+  if(!confirm('לאפס את כל הסימונים?')) return;
+  Object.keys(state).forEach(k => delete state[k]);
+  contractors.forEach((c,ci) => c.workers.forEach((_,wi) => renderWorkerRow(ci,wi)));
+  updateStats();
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('datetime').innerHTML =
+    `<strong>${now.toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'})}</strong><br>${now.toLocaleDateString('he-IL')}`;
+}
+
+// ---- Supabase - סנכרון בזמן אמת בין כל המכשירים ----
+const SUPA_URL = 'https://qyodkpdwtqazlzdvzolg.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5b2RrcGR3dHFhemx6ZHZ6b2xnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MDQ5MjUsImV4cCI6MjA5NjQ4MDkyNX0.bvLOUTpy2TobwO3KKMfm_1MmOdTPn0tqC6R0YadmQXo';
+
+const HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SUPA_KEY,
+  'Authorization': 'Bearer ' + SUPA_KEY,
+  'Prefer': 'resolution=merge-duplicates'
+};
+
+// הודעת סטטוס
+const savedMsg = document.createElement('div');
+savedMsg.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;display:none;font-family:Heebo,sans-serif;transition:all 0.3s';
+document.body.appendChild(savedMsg);
+
+let saveTimer;
+function showMsg(text, color='#166534', textColor='#4ade80', border='#22c55e') {
+  savedMsg.style.background = color;
+  savedMsg.style.color = textColor;
+  savedMsg.style.border = '1px solid ' + border;
+  savedMsg.textContent = text;
+  savedMsg.style.display = 'block';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => savedMsg.style.display = 'none', 2000);
+}
+
+// מחוון חיבור
+const connDot = document.createElement('div');
+connDot.style.cssText = 'position:fixed;top:8px;left:12px;width:10px;height:10px;border-radius:50%;background:#eab308;z-index:999;box-shadow:0 0 6px #eab308';
+connDot.title = 'מתחבר...';
+document.body.appendChild(connDot);
+function setConn(ok) {
+  connDot.style.background = ok ? '#22c55e' : '#ef4444';
+  connDot.style.boxShadow = ok ? '0 0 6px #22c55e' : '0 0 6px #ef4444';
+  connDot.title = ok ? 'מחובר לענן ✓' : 'אין חיבור';
+}
+
+async function saveRow(key, status, ok) {
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/checkin`, {
+      method: 'POST',
+      headers: HEADERS,
+      body: JSON.stringify({ id: key, status: status || null, ok: ok || false, updated_at: new Date().toISOString() })
+    });
+    if (res.ok) { setConn(true); showMsg('✓ נשמר בענן'); }
+    else { setConn(false); showMsg('⚠ שגיאה בשמירה','#7f1d1d','#fca5a5','#ef4444'); }
+  } catch(e) { setConn(false); showMsg('⚠ אין חיבור','#7f1d1d','#fca5a5','#ef4444'); }
+}
+
+async function loadAllFromSupabase() {
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/checkin?select=id,status,ok`, { headers: HEADERS });
+    if (!res.ok) { setConn(false); return; }
+    const rows = await res.json();
+    rows.forEach(row => {
+      if (row.status) state[row.id] = row.status;
+      else delete state[row.id];
+      if (row.ok) stateOk[row.id] = true;
+      else delete stateOk[row.id];
+    });
+    contractors.forEach((c,ci) => c.workers.forEach((_,wi) => renderWorkerRow(ci,wi)));
+    updateStats();
+    setConn(true);
+    showMsg('✓ נטען מהענן');
+  } catch(e) { setConn(false); }
+}
+
+// עדכון toggle לשמור ב-Supabase
+const _origToggle = toggle;
+window.toggle = function(ci, wi, val) {
+  _origToggle(ci, wi, val);
+  const k = workerKey(ci, wi);
+  saveRow(k, state[k] || null, stateOk[k] || false);
+};
+
+const _origToggleOk = toggleOk;
+window.toggleOk = function(ci, wi) {
+  _origToggleOk(ci, wi);
+  const k = workerKey(ci, wi);
+  saveRow(k, state[k] || null, stateOk[k] || false);
+};
+
+function resetAll() {
+  if(!confirm('לאפס את כל הסימונים?')) return;
+  Object.keys(state).forEach(k => delete state[k]);
+  Object.keys(stateOk).forEach(k => delete stateOk[k]);
+  contractors.forEach((c,ci) => c.workers.forEach((_,wi) => renderWorkerRow(ci,wi)));
+  updateStats();
+  // מחיקת כל השורות ב-Supabase
+  fetch(`${SUPA_URL}/rest/v1/checkin?id=neq.PLACEHOLDER`, { method: 'DELETE', headers: {...HEADERS, 'Prefer': ''} })
+    .then(() => showMsg('✓ אופס','#166534','#4ade80','#22c55e'));
+}
+
+buildUI();
+updateClock();
+setInterval(updateClock, 10000);
+
+// טעינה ראשונית + רענון כל 10 שניות
+loadAllFromSupabase();
+setInterval(loadAllFromSupabase, 10000);
+</script>
+</body>
+</html>
