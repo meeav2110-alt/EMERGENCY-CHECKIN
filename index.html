@@ -389,7 +389,93 @@
 
 <div class="export-wrap">
   <button class="export-btn btn-report" onclick="openReport()">📋 הצג דוח מלא</button>
-  <button class="export-btn btn-reset" onclick="resetAll()">🔄 איפוס</button>
+  <button class="export-btn btn-reset" onclick="askAdminPassword('reset')">🔄 איפוס</button>
+  <button class="export-btn" style="background:#7c3aed;color:white;flex:0.6" onclick="askAdminPassword('admin')">⚙️</button>
+</div>
+
+<!-- Password Modal -->
+<div class="modal-overlay" id="pwd-modal">
+  <div class="modal" style="max-height:50vh">
+    <h2 id="pwd-title">🔐 הזיני סיסמה</h2>
+    <div class="sub">גישה מוגבלת למנהלת המערכת</div>
+    <input type="password" id="pwd-input" placeholder="סיסמה..."
+      style="width:100%;padding:14px;border-radius:12px;border:1px solid #334155;background:#1a2235;color:white;font-size:16px;font-family:Heebo,sans-serif;margin:12px 0;text-align:center;direction:ltr"
+      onkeydown="if(event.key==='Enter')checkPassword()">
+    <div id="pwd-error" style="color:#ef4444;font-size:13px;text-align:center;display:none;margin-bottom:8px">❌ סיסמה שגויה</div>
+    <div style="display:flex;gap:10px">
+      <button class="export-btn btn-report" style="flex:1" onclick="checkPassword()">כניסה</button>
+      <button class="modal-close" style="flex:1;margin-top:0" onclick="closePwdModal()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Panel Modal -->
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal" style="max-height:92vh;padding-bottom:20px">
+    <h2>⚙️ ניהול מערכת</h2>
+    <div class="sub">עריכה, הוספה ומחיקה של עובדים וקבלנים</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="filter-tab active" id="tab-workers" onclick="showAdminTab('workers',this)">👷 עובדים</button>
+      <button class="filter-tab" id="tab-add" onclick="showAdminTab('add',this)">➕ הוסף עובד</button>
+      <button class="filter-tab" id="tab-contractor" onclick="showAdminTab('contractor',this)">🏢 קבלנים</button>
+    </div>
+
+    <!-- Workers Tab -->
+    <div id="admin-workers">
+      <input type="text" id="admin-search" placeholder="חיפוש עובד..." oninput="renderAdminWorkers()"
+        style="width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:13px;text-align:right;direction:rtl;margin-bottom:10px">
+      <div id="admin-workers-list" style="overflow-y:auto;max-height:50vh"></div>
+    </div>
+
+    <!-- Add Worker Tab -->
+    <div id="admin-add" style="display:none">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <select id="new-contractor" style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:13px;direction:rtl"></select>
+        <input type="text" id="new-name" placeholder="שם מלא *"
+          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+        <input type="tel" id="new-phone" placeholder="טלפון נייד"
+          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+        <input type="text" id="new-note" placeholder="הערה (אופציונלי)"
+          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+        <button class="export-btn btn-report" onclick="addWorker()">➕ הוסף עובד</button>
+        <div id="add-msg" style="text-align:center;font-size:13px;display:none"></div>
+      </div>
+    </div>
+
+    <!-- Contractors Tab -->
+    <div id="admin-contractor" style="display:none">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+        <input type="text" id="new-contractor-name" placeholder="שם קבלן חדש *"
+          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+        <button class="export-btn btn-report" onclick="addContractor()">➕ הוסף קבלן</button>
+      </div>
+      <div id="contractor-list" style="overflow-y:auto;max-height:45vh"></div>
+    </div>
+
+    <button class="modal-close" style="margin-top:16px" onclick="closeAdminModal()">סגור ✓</button>
+  </div>
+</div>
+
+<!-- Edit Worker Modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal" style="max-height:65vh">
+    <h2>✏️ עריכת עובד</h2>
+    <input type="hidden" id="edit-ci">
+    <input type="hidden" id="edit-wi">
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+      <input type="text" id="edit-name" placeholder="שם מלא"
+        style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+      <input type="tel" id="edit-phone" placeholder="טלפון"
+        style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+      <input type="text" id="edit-note" placeholder="הערה"
+        style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+      <div style="display:flex;gap:8px">
+        <button class="export-btn btn-report" style="flex:1" onclick="saveEdit()">💾 שמור</button>
+        <button class="export-btn" style="flex:1;background:#dc2626;color:white" onclick="deleteWorker()">🗑 מחק</button>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('edit-modal').classList.remove('open')">ביטול</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
@@ -397,7 +483,97 @@
     <h2>📋 דוח נוכחות חירום</h2>
     <div class="sub" id="report-time"></div>
     <div id="report-body"></div>
-    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">סגור</button>
+    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open'); window._refreshInterval=setInterval(()=>loadAllFromSupabase(true),10000)">סגור</button>
+  </div>
+</div>
+
+<!-- Admin Password Modal -->
+<div class="modal-overlay" id="pwd-modal">
+  <div class="modal" style="max-height:50vh">
+    <h2 id="pwd-title">🔐 הזיני סיסמה</h2>
+    <div class="sub">גישה מוגבלת למנהלת המערכת</div>
+    <input type="password" id="pwd-input" placeholder="סיסמה..." 
+      style="width:100%;padding:14px;border-radius:12px;border:1px solid #334155;background:#1a2235;color:white;font-size:16px;font-family:Heebo,sans-serif;margin:12px 0;text-align:right;direction:rtl"
+      onkeydown="if(event.key==='Enter')checkPassword()">
+    <div id="pwd-error" style="color:#ef4444;font-size:13px;text-align:right;display:none">❌ סיסמה שגויה</div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="export-btn btn-report" style="flex:1" onclick="checkPassword()">כניסה</button>
+      <button class="modal-close" style="flex:1;margin-top:0" onclick="closePwdModal()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Panel Modal -->
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal" style="max-height:92vh;padding-bottom:20px">
+    <h2>⚙️ ניהול מערכת</h2>
+    <div class="sub">הוספה, עריכה ומחיקה של עובדים וקבלנים</div>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="filter-tab active" id="tab-workers" onclick="showAdminTab('workers',this)">👷 עובדים</button>
+      <button class="filter-tab" id="tab-add" onclick="showAdminTab('add',this)">➕ הוסף עובד</button>
+      <button class="filter-tab" id="tab-contractor" onclick="showAdminTab('contractor',this)">🏢 קבלנים</button>
+    </div>
+
+    <!-- Workers Tab -->
+    <div id="admin-workers" style="overflow-y:auto;max-height:55vh">
+      <div style="margin-bottom:10px">
+        <input type="text" id="admin-search" placeholder="חיפוש עובד..." oninput="renderAdminWorkers()"
+          style="width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:13px;text-align:right;direction:rtl">
+      </div>
+      <div id="admin-workers-list"></div>
+    </div>
+
+    <!-- Add Worker Tab -->
+    <div id="admin-add" style="display:none">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <select id="new-contractor" style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:13px;direction:rtl">
+        </select>
+        <input type="text" id="new-name" placeholder="שם מלא *" 
+          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+        <input type="tel" id="new-phone" placeholder="טלפון נייד" 
+          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+        <input type="text" id="new-note" placeholder="הערה (אופציונלי)" 
+          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+        <button class="export-btn btn-report" onclick="addWorker()">➕ הוסף עובד</button>
+        <div id="add-msg" style="text-align:center;font-size:13px;display:none"></div>
+      </div>
+    </div>
+
+    <!-- Contractors Tab -->
+    <div id="admin-contractor" style="display:none">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+        <input type="text" id="new-contractor-name" placeholder="שם קבלן חדש *"
+          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+        <button class="export-btn btn-report" onclick="addContractor()">➕ הוסף קבלן</button>
+      </div>
+      <div id="contractor-list" style="overflow-y:auto;max-height:40vh"></div>
+    </div>
+
+    <button class="modal-close" style="margin-top:16px" onclick="closeAdminModal()">סגור</button>
+  </div>
+</div>
+
+<!-- Edit Worker Modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal" style="max-height:60vh">
+    <h2>✏️ עריכת עובד</h2>
+    <input type="hidden" id="edit-ci">
+    <input type="hidden" id="edit-wi">
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+      <input type="text" id="edit-name" placeholder="שם מלא"
+        style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+      <input type="tel" id="edit-phone" placeholder="טלפון"
+        style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+      <input type="text" id="edit-note" placeholder="הערה"
+        style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
+      <div style="display:flex;gap:8px">
+        <button class="export-btn btn-report" style="flex:1" onclick="saveEdit()">💾 שמור</button>
+        <button class="export-btn" style="flex:1;background:#dc2626;color:white" onclick="deleteWorker()">🗑 מחק</button>
+      </div>
+      <button class="modal-close" style="margin-top:4px" onclick="document.getElementById('edit-modal').classList.remove('open')">ביטול</button>
+    </div>
   </div>
 </div>
 
@@ -794,6 +970,9 @@ function filterWorkers() {
 }
 
 function openReport() {
+  // עצור רענון אוטומטי בזמן שהדוח פתוח
+  if(window._refreshInterval) clearInterval(window._refreshInterval);
+
   const now = new Date();
   document.getElementById('report-time').textContent =
     `תאריך: ${now.toLocaleDateString('he-IL')}  |  שעה: ${now.toLocaleTimeString('he-IL')}`;
@@ -833,7 +1012,11 @@ function openReport() {
 }
 
 function closeModal(e) {
-  if(e.target.id==='modal') document.getElementById('modal').classList.remove('open');
+  if(e.target.id==='modal') {
+    document.getElementById('modal').classList.remove('open');
+    // חדש את הרענון האוטומטי
+    window._refreshInterval = setInterval(() => loadAllFromSupabase(true), 10000);
+  }
 }
 
 function resetAll() {
@@ -862,7 +1045,7 @@ const HEADERS = {
 
 // הודעת סטטוס
 const savedMsg = document.createElement('div');
-savedMsg.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;display:none;font-family:Heebo,sans-serif;transition:all 0.3s';
+savedMsg.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;display:none;font-family:Heebo,sans-serif;transition:all 0.3s';
 document.body.appendChild(savedMsg);
 
 let saveTimer;
@@ -899,7 +1082,7 @@ async function saveRow(key, status, ok) {
   } catch(e) { setConn(false); showMsg('⚠ אין חיבור','#7f1d1d','#fca5a5','#ef4444'); }
 }
 
-async function loadAllFromSupabase() {
+async function loadAllFromSupabase(silent = false) {
   try {
     const res = await fetch(`${SUPA_URL}/rest/v1/checkin?select=id,status,ok`, { headers: HEADERS });
     if (!res.ok) { setConn(false); return; }
@@ -913,7 +1096,7 @@ async function loadAllFromSupabase() {
     contractors.forEach((c,ci) => c.workers.forEach((_,wi) => renderWorkerRow(ci,wi)));
     updateStats();
     setConn(true);
-    showMsg('✓ נטען מהענן');
+    if (!silent) showMsg('✓ נטען מהענן');
   } catch(e) { setConn(false); }
 }
 
@@ -948,8 +1131,186 @@ updateClock();
 setInterval(updateClock, 10000);
 
 // טעינה ראשונית + רענון כל 10 שניות
-loadAllFromSupabase();
-setInterval(loadAllFromSupabase, 10000);
+loadAllFromSupabase(false);
+window._refreshInterval = setInterval(() => loadAllFromSupabase(true), 10000);
+
+// ============================================================
+// ADMIN SYSTEM
+// ============================================================
+const ADMIN_PASSWORD = 'Liya262020';
+let pendingAdminAction = null;
+
+function askAdminPassword(action) {
+  pendingAdminAction = action;
+  document.getElementById('pwd-title').textContent = action === 'reset' ? '🔄 איפוס נתונים' : '⚙️ כניסה לניהול';
+  document.getElementById('pwd-input').value = '';
+  document.getElementById('pwd-error').style.display = 'none';
+  document.getElementById('pwd-modal').classList.add('open');
+  setTimeout(() => document.getElementById('pwd-input').focus(), 300);
+}
+
+function closePwdModal() {
+  document.getElementById('pwd-modal').classList.remove('open');
+  pendingAdminAction = null;
+}
+
+function checkPassword() {
+  const val = document.getElementById('pwd-input').value;
+  if (val === ADMIN_PASSWORD) {
+    closePwdModal();
+    if (pendingAdminAction === 'reset') doReset();
+    else if (pendingAdminAction === 'admin') openAdminPanel();
+  } else {
+    document.getElementById('pwd-error').style.display = 'block';
+    document.getElementById('pwd-input').value = '';
+    document.getElementById('pwd-input').focus();
+  }
+}
+
+function doReset() {
+  if(!confirm('לאפס את כל הסימונים?')) return;
+  Object.keys(state).forEach(k => delete state[k]);
+  Object.keys(stateOk).forEach(k => delete stateOk[k]);
+  contractors.forEach((c,ci) => c.workers.forEach((_,wi) => renderWorkerRow(ci,wi)));
+  updateStats();
+  fetch(`${SUPA_URL}/rest/v1/checkin?id=neq.PLACEHOLDER`, { method: 'DELETE', headers: {...HEADERS, 'Prefer': ''} })
+    .then(() => showMsg('✓ אופס','#166534','#4ade80','#22c55e'));
+}
+
+function openAdminPanel() {
+  const sel = document.getElementById('new-contractor');
+  sel.innerHTML = contractors.map((c,i) => `<option value="${i}">${c.name}</option>`).join('');
+  showAdminTab('workers', document.getElementById('tab-workers'));
+  document.getElementById('admin-modal').classList.add('open');
+  if(window._refreshInterval) clearInterval(window._refreshInterval);
+}
+
+function closeAdminModal() {
+  document.getElementById('admin-modal').classList.remove('open');
+  window._refreshInterval = setInterval(() => loadAllFromSupabase(true), 10000);
+  document.getElementById('contractors-container').innerHTML = '';
+  buildUI();
+  contractors.forEach((c,ci) => c.workers.forEach((_,wi) => renderWorkerRow(ci,wi)));
+  updateStats();
+  filterWorkers();
+}
+
+function showAdminTab(tab, btn) {
+  ['workers','add','contractor'].forEach(t => {
+    document.getElementById('admin-'+t).style.display = t===tab ? '' : 'none';
+  });
+  document.querySelectorAll('#admin-modal .filter-tab').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(tab==='workers') renderAdminWorkers();
+  if(tab==='contractor') renderContractorList();
+}
+
+function renderAdminWorkers() {
+  const q = (document.getElementById('admin-search').value || '').toLowerCase();
+  let html = '';
+  contractors.forEach((c, ci) => {
+    const filtered = c.workers.map((w,wi)=>({w,wi})).filter(({w}) => !q || w.name.includes(q) || (w.phone||'').includes(q));
+    if (!filtered.length) return;
+    html += `<div style="font-size:11px;font-weight:700;color:${c.color};padding:8px 0 4px;border-bottom:1px solid #1e2d45">${c.name} (${c.workers.length})</div>`;
+    filtered.forEach(({w,wi}) => {
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1e2d45">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600">${w.name}</div>
+          <div style="font-size:11px;color:#64748b">${w.phone||'—'}${w.note?' | '+w.note:''}</div>
+        </div>
+        <button onclick="openEditWorker(${ci},${wi})" style="padding:6px 14px;background:#1e40af;color:white;border:none;border-radius:8px;font-family:Heebo,sans-serif;font-size:12px;cursor:pointer;flex-shrink:0">✏️ עריכה</button>
+      </div>`;
+    });
+  });
+  document.getElementById('admin-workers-list').innerHTML = html || '<div style="color:#64748b;text-align:center;padding:20px">לא נמצאו עובדים</div>';
+}
+
+function openEditWorker(ci, wi) {
+  const w = contractors[ci].workers[wi];
+  document.getElementById('edit-ci').value = ci;
+  document.getElementById('edit-wi').value = wi;
+  document.getElementById('edit-name').value = w.name;
+  document.getElementById('edit-phone').value = w.phone || '';
+  document.getElementById('edit-note').value = w.note || '';
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function saveEdit() {
+  const ci = parseInt(document.getElementById('edit-ci').value);
+  const wi = parseInt(document.getElementById('edit-wi').value);
+  contractors[ci].workers[wi].name = document.getElementById('edit-name').value.trim();
+  contractors[ci].workers[wi].phone = document.getElementById('edit-phone').value.trim();
+  contractors[ci].workers[wi].note = document.getElementById('edit-note').value.trim();
+  document.getElementById('edit-modal').classList.remove('open');
+  renderAdminWorkers();
+  showMsg('✓ נשמר','#166534','#4ade80','#22c55e');
+}
+
+function deleteWorker() {
+  const ci = parseInt(document.getElementById('edit-ci').value);
+  const wi = parseInt(document.getElementById('edit-wi').value);
+  const name = contractors[ci].workers[wi].name;
+  if(!confirm(`למחוק את ${name}?`)) return;
+  contractors[ci].workers.splice(wi, 1);
+  document.getElementById('edit-modal').classList.remove('open');
+  renderAdminWorkers();
+  showMsg('🗑 נמחק','#7f1d1d','#fca5a5','#ef4444');
+}
+
+function addWorker() {
+  const ci = parseInt(document.getElementById('new-contractor').value);
+  const name = document.getElementById('new-name').value.trim();
+  const phone = document.getElementById('new-phone').value.trim();
+  const note = document.getElementById('new-note').value.trim();
+  const msg = document.getElementById('add-msg');
+  if (!name) {
+    msg.style.display='block'; msg.style.color='#ef4444';
+    msg.textContent='⚠ נא להזין שם'; return;
+  }
+  contractors[ci].workers.push({ name, phone, note });
+  document.getElementById('new-name').value = '';
+  document.getElementById('new-phone').value = '';
+  document.getElementById('new-note').value = '';
+  msg.style.display='block'; msg.style.color='#4ade80';
+  msg.textContent=`✓ ${name} נוסף ל${contractors[ci].name}`;
+  setTimeout(() => msg.style.display='none', 3000);
+}
+
+function renderContractorList() {
+  let html = '';
+  contractors.forEach((c, ci) => {
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1e2d45">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:12px;height:12px;border-radius:50%;background:${c.color};flex-shrink:0"></div>
+        <div>
+          <div style="font-size:13px;font-weight:600">${c.name}</div>
+          <div style="font-size:11px;color:#64748b">${c.workers.length} עובדים</div>
+        </div>
+      </div>
+      <button onclick="deleteContractor(${ci})" style="padding:6px 12px;background:#7f1d1d;color:#fca5a5;border:none;border-radius:8px;font-family:Heebo,sans-serif;font-size:12px;cursor:pointer">🗑</button>
+    </div>`;
+  });
+  document.getElementById('contractor-list').innerHTML = html;
+}
+
+function addContractor() {
+  const name = document.getElementById('new-contractor-name').value.trim();
+  if (!name) return;
+  const colors = ["1E40AF","15803D","7C3AED","B45309","DC2626","0891B2","9D174D","475569","064E3B"];
+  contractors.push({ name, color: '#' + colors[contractors.length % colors.length], workers: [] });
+  document.getElementById('new-contractor-name').value = '';
+  document.getElementById('new-contractor').innerHTML = contractors.map((c,i) => `<option value="${i}">${c.name}</option>`).join('');
+  renderContractorList();
+  showMsg(`✓ ${name} נוסף`,'#166534','#4ade80','#22c55e');
+}
+
+function deleteContractor(ci) {
+  if (!confirm(`למחוק את "${contractors[ci].name}" וכל עובדיו?`)) return;
+  contractors.splice(ci, 1);
+  renderContractorList();
+  document.getElementById('new-contractor').innerHTML = contractors.map((c,i) => `<option value="${i}">${c.name}</option>`).join('');
+  showMsg('🗑 נמחק','#7f1d1d','#fca5a5','#ef4444');
+}
 </script>
 </body>
 </html>
