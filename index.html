@@ -2,1315 +2,534 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
 <title>נמל אשדוד | מעקב חירום</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
-
-  :root {
-    --bg: #0a0e1a;
-    --card: #111827;
-    --card2: #1a2235;
-    --border: #1e2d45;
-    --accent: #f97316;
-    --accent2: #ef4444;
-    --green: #22c55e;
-    --yellow: #eab308;
-    --text: #f1f5f9;
-    --muted: #64748b;
-    --present: #14532d;
-    --present-border: #22c55e;
-    --absent: #450a0a;
-    --absent-border: #ef4444;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Heebo', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding-bottom: 40px;
-  }
-
-  /* Header */
-  .header {
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
-    border-bottom: 2px solid var(--accent);
-    padding: 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 4px 24px rgba(249,115,22,0.2);
-  }
-  .header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .logo-icon {
-    width: 40px; height: 40px;
-    background: var(--accent);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-  }
-  .logo-text h1 { font-size: 16px; font-weight: 900; letter-spacing: -0.5px; }
-  .logo-text p { font-size: 11px; color: var(--muted); }
-
-  .date-time {
-    text-align: left;
-    font-size: 11px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-  .date-time strong { color: var(--accent); font-size: 13px; }
-
-  /* Stats bar */
-  .stats-bar {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-top: 10px;
-  }
-  .stat {
-    background: rgba(255,255,255,0.05);
-    border-radius: 10px;
-    padding: 8px;
-    text-align: center;
-    border: 1px solid var(--border);
-  }
-  .stat-num { font-size: 22px; font-weight: 900; line-height: 1; }
-  .stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
-  .stat.total .stat-num { color: var(--text); }
-  .stat.present .stat-num { color: var(--green); }
-  .stat.absent .stat-num { color: var(--accent2); }
-  .stat.unknown .stat-num { color: var(--yellow); }
-
-  /* Progress bar */
-  .progress-wrap {
-    background: var(--border);
-    border-radius: 4px;
-    height: 6px;
-    margin-top: 10px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--green), #86efac);
-    border-radius: 4px;
-    transition: width 0.5s ease;
-  }
-
-  /* Search & filters */
-  .controls {
-    padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .search-box {
-    position: relative;
-  }
-  .search-box input {
-    width: 100%;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 16px 12px 44px;
-    color: var(--text);
-    font-family: 'Heebo', sans-serif;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .search-box input:focus { border-color: var(--accent); }
-  .search-icon {
-    position: absolute;
-    left: 14px; top: 50%;
-    transform: translateY(-50%);
-    color: var(--muted);
-    font-size: 16px;
-  }
-
-  .filter-tabs {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    scrollbar-width: none;
-  }
-  .filter-tabs::-webkit-scrollbar { display: none; }
-  .filter-tab {
-    flex-shrink: 0;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--muted);
-    font-family: 'Heebo', sans-serif;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .filter-tab.active { background: var(--accent); border-color: var(--accent); color: white; font-weight: 700; }
-  .filter-tab.green.active { background: var(--green); border-color: var(--green); }
-  .filter-tab.red.active { background: var(--accent2); border-color: var(--accent2); }
-
-  /* Contractor sections */
-  .contractor-section {
-    margin: 0 12px 12px;
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-  }
-  .contractor-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.2s;
-  }
-  .contractor-header:active { opacity: 0.8; }
-  .contractor-left { display: flex; align-items: center; gap: 10px; }
-  .contractor-dot {
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .contractor-name { font-size: 14px; font-weight: 700; }
-  .contractor-meta { font-size: 11px; color: var(--muted); }
-  .contractor-right { display: flex; align-items: center; gap: 8px; }
-  .mini-stat {
-    display: flex; align-items: center; gap: 3px;
-    font-size: 12px; font-weight: 700;
-  }
-  .mini-stat.g { color: var(--green); }
-  .mini-stat.r { color: var(--accent2); }
-  .chevron { color: var(--muted); transition: transform 0.3s; font-size: 14px; }
-  .chevron.open { transform: rotate(180deg); }
-
-  .workers-list {
-    display: none;
-    flex-direction: column;
-    gap: 0;
-  }
-  .workers-list.open { display: flex; }
-
-  /* Worker row */
-  .worker-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    background: var(--card2);
-    transition: background 0.15s;
-  }
-  .worker-row.present { background: rgba(34,197,94,0.08); border-right: 3px solid var(--green); }
-  .worker-row.absent { background: rgba(239,68,68,0.08); border-right: 3px solid var(--accent2); }
-
-  .worker-info { flex: 1; min-width: 0; }
-  .worker-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .worker-phone { font-size: 11px; color: var(--muted); direction: ltr; }
-  .worker-note { font-size: 10px; color: var(--yellow); margin-top: 1px; }
-
-  .btn-group { display: flex; gap: 6px; flex-shrink: 0; }
-  .btn-check {
-    width: 38px; height: 38px;
-    border-radius: 10px;
-    border: 2px solid;
-    background: transparent;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .btn-check:active { transform: scale(0.9); }
-  .btn-yes { border-color: var(--green); color: var(--green); }
-  .btn-yes.active { background: var(--green); color: white; }
-  .btn-no { border-color: var(--accent2); color: var(--accent2); }
-  .btn-no.active { background: var(--accent2); color: white; }
-
-  .call-btn {
-    width: 38px; height: 38px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--muted);
-    font-size: 16px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    text-decoration: none;
-    -webkit-tap-highlight-color: transparent;
-    transition: all 0.15s;
-  }
-  .call-btn:active { background: var(--border); }
-
-  /* Export button */
-  .export-wrap {
-    padding: 16px;
-    display: flex;
-    gap: 10px;
-  }
-  .export-btn {
-    flex: 1;
-    padding: 14px;
-    border-radius: 14px;
-    border: none;
-    font-family: 'Heebo', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .export-btn:active { transform: scale(0.97); }
-  .btn-report { background: var(--accent); color: white; }
-  .btn-reset { background: var(--card); color: var(--muted); border: 1px solid var(--border); }
-
-  /* Modal */
-  .modal-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.8);
-    z-index: 200;
-    align-items: flex-end;
-    justify-content: center;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--card);
-    border-radius: 24px 24px 0 0;
-    width: 100%;
-    max-height: 85vh;
-    overflow-y: auto;
-    padding: 24px 20px 40px;
-    border-top: 2px solid var(--accent);
-  }
-  .modal h2 { font-size: 18px; font-weight: 900; margin-bottom: 6px; }
-  .modal .sub { color: var(--muted); font-size: 12px; margin-bottom: 20px; }
-  .report-line {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-  }
-  .report-line:last-child { border-bottom: none; }
-  .report-section-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 12px 0 4px;
-  }
-  .badge {
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-  }
-  .badge.p { background: rgba(34,197,94,0.2); color: var(--green); }
-  .badge.a { background: rgba(239,68,68,0.2); color: var(--accent2); }
-  .badge.u { background: rgba(234,179,8,0.2); color: var(--yellow); }
-  .modal-close {
-    width: 100%; padding: 14px;
-    background: var(--border); border: none; border-radius: 12px;
-    color: var(--text); font-family: 'Heebo', sans-serif;
-    font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 20px;
-  }
-
-  .btn-ok { border-color: #16a34a; color: #16a34a; font-size: 16px; }
-  .btn-ok.active { background: linear-gradient(135deg,#15803d,#22c55e); border-color: #22c55e; color: white; box-shadow: 0 0 10px rgba(34,197,94,0.5); }
-
-  .ok-badge {
-    font-size: 10px; font-weight: 700;
-    padding: 3px 8px; border-radius: 20px;
-    background: linear-gradient(135deg,#14532d,#166534);
-    color: #4ade80; border: 1px solid #22c55e;
-    white-space: nowrap; display: none; letter-spacing: 0.3px;
-  }
-  .ok-badge.show { display: inline-block; }
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--muted);
-    font-size: 14px;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap');
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2235;--border:#1e2d45;--accent:#f97316;--red:#ef4444;--green:#22c55e;--yellow:#eab308;--text:#f1f5f9;--muted:#64748b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);padding-bottom:60px}
+.hdr{background:linear-gradient(135deg,#0f172a,#1e1b4b);border-bottom:2px solid var(--accent);padding:14px 16px;position:sticky;top:0;z-index:100}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-ic{width:36px;height:36px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo h1{font-size:15px;font-weight:900}
+.logo p{font-size:10px;color:var(--muted)}
+.dt{text-align:left;font-size:11px;color:var(--muted)}
+.dt strong{color:var(--accent);font-size:13px;display:block}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.st{background:rgba(255,255,255,.05);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border)}
+.st-n{font-size:20px;font-weight:900}.st-l{font-size:10px;color:var(--muted)}
+.pr .st-n{color:var(--green)}.ab .st-n{color:var(--red)}.un .st-n{color:var(--yellow)}
+.prog{background:var(--border);border-radius:4px;height:5px;margin-top:8px;overflow:hidden}
+.prog-f{height:100%;background:linear-gradient(90deg,var(--green),#86efac);transition:width .4s}
+.ctrl{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.srch{position:relative}
+.srch input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 14px 11px 40px;color:var(--text);font-family:inherit;font-size:14px;outline:none}
+.srch input:focus{border-color:var(--accent)}
+.srch-ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--muted)}
+.ftabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.ftab{flex-shrink:0;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:inherit;font-size:12px;cursor:pointer}
+.ftab.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.sec{margin:0 12px 10px;border-radius:14px;overflow:hidden;border:1px solid var(--border)}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer}
+.sec-l{display:flex;align-items:center;gap:10px}
+.dot{width:11px;height:11px;border-radius:50%}
+.sec-name{font-size:14px;font-weight:700}
+.sec-sub{font-size:11px;color:var(--muted)}
+.sec-r{display:flex;align-items:center;gap:8px}
+.chv{color:var(--muted);font-size:13px;transition:transform .3s}
+.chv.op{transform:rotate(180deg)}
+.wlist{display:none}.wlist.op{display:block}
+.wrow{display:flex;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid var(--border);background:var(--card2)}
+.wrow.yes{background:rgba(34,197,94,.08);border-right:3px solid var(--green)}
+.wrow.no{background:rgba(239,68,68,.08);border-right:3px solid var(--red)}
+.wi{flex:1;min-width:0}
+.wn{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wp{font-size:11px;color:var(--muted);direction:ltr}
+.wt{font-size:10px;color:var(--yellow)}
+.okb{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#14532d;color:#4ade80;border:1px solid var(--green);display:none;margin-top:2px}
+.okb.on{display:inline-block}
+.btns{display:flex;gap:5px;flex-shrink:0}
+.bc{width:36px;height:36px;border-radius:10px;border:2px solid;background:transparent;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.by{border-color:var(--green);color:var(--green)}.by.on{background:var(--green);color:#fff}
+.bn{border-color:var(--red);color:var(--red)}.bn.on{background:var(--red);color:#fff}
+.bok{border-color:#16a34a;color:#16a34a}.bok.on{background:linear-gradient(135deg,#15803d,#22c55e);border-color:var(--green);color:#fff}
+.ca{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.bbar{padding:14px 16px;display:flex;gap:8px}
+.btn{flex:1;padding:13px;border-radius:13px;border:none;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.btn:active{transform:scale(.97)}
+.btn-or{background:var(--accent);color:#fff}
+.btn-gr{background:var(--card);color:var(--muted);border:1px solid var(--border)}
+.btn-pu{background:#7c3aed;color:#fff;flex:0 0 auto;padding:13px 16px}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:flex-end;justify-content:center}
+.ov.op{display:flex}
+.mod{background:var(--card);border-radius:22px 22px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:22px 18px 40px;border-top:2px solid var(--accent)}
+.mod h2{font-size:17px;font-weight:900;margin-bottom:5px}
+.mod .sub{color:var(--muted);font-size:12px;margin-bottom:14px}
+.mcls{width:100%;padding:13px;background:var(--border);border:none;border-radius:12px;color:var(--text);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:14px}
+.inp{width:100%;padding:11px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:var(--text);font-family:inherit;font-size:14px;text-align:right;direction:rtl;margin-bottom:10px;outline:none}
+.inp:focus{border-color:var(--accent)}
+.rl{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.rs{font-size:11px;font-weight:700;padding:10px 0 3px}
+.bdg{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.bdg-p{background:rgba(34,197,94,.2);color:var(--green)}
+.bdg-a{background:rgba(239,68,68,.2);color:var(--red)}
+.bdg-u{background:rgba(234,179,8,.2);color:var(--yellow)}
+.bdg-ok{background:#14532d;color:#4ade80;border:1px solid var(--green)}
+.tb{padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:inherit;font-size:12px;cursor:pointer;flex-shrink:0}
+.tb.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+#conn{position:fixed;top:10px;left:12px;width:10px;height:10px;border-radius:50%;background:#eab308;z-index:999;box-shadow:0 0 5px #eab308}
+#tst{position:fixed;top:66px;left:50%;transform:translateX(-50%);padding:7px 16px;border-radius:20px;font-size:13px;font-weight:700;z-index:998;display:none;white-space:nowrap;font-family:inherit}
 </style>
 </head>
 <body>
-
-<div class="header">
-  <div class="header-top">
-    <div class="logo">
-      <div class="logo-icon">⚠️</div>
-      <div class="logo-text">
-        <h1>נמל אשדוד — חירום</h1>
-        <p>שינוע אשדוד | מעקב נוכחות</p>
-      </div>
-    </div>
-    <div class="date-time" id="datetime"></div>
+<div id="conn"></div>
+<div id="tst"></div>
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="logo"><div class="logo-ic">&#9888;&#65039;</div><div><h1>&#1504;&#1502;&#1500; &#1488;&#1513;&#1491;&#1493;&#1491; &#8212; &#1495;&#1497;&#1512;&#1493;&#1501;</h1><p>&#1513;&#1497;&#1504;&#1493;&#1506; &#1488;&#1513;&#1491;&#1493;&#1491; | &#1502;&#1506;&#1511;&#1489; &#1504;&#1493;&#1499;&#1495;&#1493;&#1514;</p></div></div>
+    <div class="dt" id="dtm"></div>
   </div>
-  <div class="stats-bar">
-    <div class="stat total"><div class="stat-num" id="s-total">0</div><div class="stat-label">סה"כ</div></div>
-    <div class="stat present"><div class="stat-num" id="s-present">0</div><div class="stat-label">נוכחים ✓</div></div>
-    <div class="stat absent"><div class="stat-num" id="s-absent">0</div><div class="stat-label">חסרים ✗</div></div>
-    <div class="stat unknown"><div class="stat-num" id="s-unknown">0</div><div class="stat-label">לא ידוע</div></div>
+  <div class="stats">
+    <div class="st"><div class="st-n" id="st">0</div><div class="st-l">&#1505;&#1492;"&#1499;</div></div>
+    <div class="st pr"><div class="st-n" id="sp">0</div><div class="st-l">&#1504;&#1493;&#1499;&#1495;&#1497;&#1501; &#10003;</div></div>
+    <div class="st ab"><div class="st-n" id="sa">0</div><div class="st-l">&#1495;&#1505;&#1512;&#1497;&#1501; &#10007;</div></div>
+    <div class="st un"><div class="st-n" id="su">0</div><div class="st-l">&#1500;&#1488; &#1497;&#1491;&#1493;&#1506;</div></div>
   </div>
-  <div class="progress-wrap"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+  <div class="prog"><div class="prog-f" id="pf" style="width:0%"></div></div>
 </div>
-
-<div class="controls">
-  <div class="search-box">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="search" placeholder="חיפוש שם או טלפון..." oninput="filterWorkers()">
-  </div>
-  <div class="filter-tabs">
-    <button class="filter-tab active" onclick="setFilter('all',this)">הכל</button>
-    <button class="filter-tab green" onclick="setFilter('present',this)">נוכחים</button>
-    <button class="filter-tab red" onclick="setFilter('absent',this)">חסרים</button>
-    <button class="filter-tab" onclick="setFilter('unknown',this)">לא סומן</button>
+<div class="ctrl">
+  <div class="srch"><span class="srch-ic">&#128269;</span><input type="text" id="sq" placeholder="&#1495;&#1497;&#1508;&#1493;&#1513; &#1513;&#1501; &#1488;&#1493; &#1496;&#1500;&#1508;&#1493;&#1503;..." oninput="doFilter()"></div>
+  <div class="ftabs">
+    <button class="ftab on" onclick="setF('all',this)">&#1492;&#1499;&#1500;</button>
+    <button class="ftab" onclick="setF('yes',this)">&#1504;&#1493;&#1499;&#1495;&#1497;&#1501;</button>
+    <button class="ftab" onclick="setF('no',this)">&#1495;&#1505;&#1512;&#1497;&#1501;</button>
+    <button class="ftab" onclick="setF('uk',this)">&#1500;&#1488; &#1505;&#1493;&#1502;&#1503;</button>
   </div>
 </div>
-
-<div id="contractors-container"></div>
-
-<div class="export-wrap">
-  <button class="export-btn btn-report" onclick="openReport()">📋 הצג דוח מלא</button>
-  <button class="export-btn btn-reset" onclick="askAdminPassword('reset')">🔄 איפוס</button>
-  <button class="export-btn" style="background:#7c3aed;color:white;flex:0.6" onclick="askAdminPassword('admin')">⚙️</button>
+<div id="mc"></div>
+<div class="bbar">
+  <button class="btn btn-or" onclick="showRpt()">&#128203; &#1491;&#1493;&#1495; &#1502;&#1500;&#1488;</button>
+  <button class="btn btn-gr" onclick="askPwd('rst')">&#128260; &#1488;&#1497;&#1508;&#1493;&#1505;</button>
+  <button class="btn btn-pu" onclick="askPwd('adm')">&#9881;&#65039;</button>
 </div>
-
-<!-- Password Modal -->
-<div class="modal-overlay" id="pwd-modal">
-  <div class="modal" style="max-height:50vh">
-    <h2 id="pwd-title">🔐 הזיני סיסמה</h2>
-    <div class="sub">גישה מוגבלת למנהלת המערכת</div>
-    <input type="password" id="pwd-input" placeholder="סיסמה..."
-      style="width:100%;padding:14px;border-radius:12px;border:1px solid #334155;background:#1a2235;color:white;font-size:16px;font-family:Heebo,sans-serif;margin:12px 0;text-align:center;direction:ltr"
-      onkeydown="if(event.key==='Enter')checkPassword()">
-    <div id="pwd-error" style="color:#ef4444;font-size:13px;text-align:center;display:none;margin-bottom:8px">❌ סיסמה שגויה</div>
-    <div style="display:flex;gap:10px">
-      <button class="export-btn btn-report" style="flex:1" onclick="checkPassword()">כניסה</button>
-      <button class="modal-close" style="flex:1;margin-top:0" onclick="closePwdModal()">ביטול</button>
-    </div>
+<div class="ov" id="ov-r"><div class="mod">
+  <h2>&#128203; &#1491;&#1493;&#1495; &#1504;&#1493;&#1499;&#1495;&#1493;&#1514; &#1495;&#1497;&#1512;&#1493;&#1501;</h2>
+  <div class="sub" id="rt"></div>
+  <div id="rb"></div>
+  <button class="mcls" onclick="closeOv('ov-r');startRef()">&#1505;&#1490;&#1493;&#1512; &#10003;</button>
+</div></div>
+<div class="ov" id="ov-p"><div class="mod" style="max-height:55vh">
+  <h2>&#128274; &#1492;&#1494;&#1497;&#1504;&#1497; &#1505;&#1497;&#1505;&#1502;&#1488;</h2>
+  <div class="sub">&#1490;&#1497;&#1513;&#1492; &#1502;&#1493;&#1490;&#1489;&#1500;&#1514; &#1500;&#1502;&#1504;&#1492;&#1500;&#1514; &#1492;&#1502;&#1506;&#1512;&#1499;&#1514;</div>
+  <input type="password" id="pi" class="inp" style="direction:ltr;text-align:center" placeholder="&#1505;&#1497;&#1505;&#1502;&#1488;..." onkeydown="if(event.key==='Enter')chkPwd()">
+  <div id="pe" style="color:var(--red);font-size:13px;text-align:center;display:none;margin-bottom:8px">&#10060; &#1505;&#1497;&#1505;&#1502;&#1488; &#1513;&#1490;&#1493;&#1497;&#1492;</div>
+  <div style="display:flex;gap:10px">
+    <button class="btn btn-or" style="flex:1" onclick="chkPwd()">&#1499;&#1504;&#1497;&#1505;&#1492;</button>
+    <button class="mcls" style="flex:1;margin-top:0" onclick="closeOv('ov-p')">&#1489;&#1497;&#1496;&#1493;&#1500;</button>
   </div>
-</div>
-
-<!-- Admin Panel Modal -->
-<div class="modal-overlay" id="admin-modal">
-  <div class="modal" style="max-height:92vh;padding-bottom:20px">
-    <h2>⚙️ ניהול מערכת</h2>
-    <div class="sub">עריכה, הוספה ומחיקה של עובדים וקבלנים</div>
-    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-      <button class="filter-tab active" id="tab-workers" onclick="showAdminTab('workers',this)">👷 עובדים</button>
-      <button class="filter-tab" id="tab-add" onclick="showAdminTab('add',this)">➕ הוסף עובד</button>
-      <button class="filter-tab" id="tab-contractor" onclick="showAdminTab('contractor',this)">🏢 קבלנים</button>
-    </div>
-
-    <!-- Workers Tab -->
-    <div id="admin-workers">
-      <input type="text" id="admin-search" placeholder="חיפוש עובד..." oninput="renderAdminWorkers()"
-        style="width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:13px;text-align:right;direction:rtl;margin-bottom:10px">
-      <div id="admin-workers-list" style="overflow-y:auto;max-height:50vh"></div>
-    </div>
-
-    <!-- Add Worker Tab -->
-    <div id="admin-add" style="display:none">
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <select id="new-contractor" style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:13px;direction:rtl"></select>
-        <input type="text" id="new-name" placeholder="שם מלא *"
-          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-        <input type="tel" id="new-phone" placeholder="טלפון נייד"
-          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-        <input type="text" id="new-note" placeholder="הערה (אופציונלי)"
-          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-        <button class="export-btn btn-report" onclick="addWorker()">➕ הוסף עובד</button>
-        <div id="add-msg" style="text-align:center;font-size:13px;display:none"></div>
-      </div>
-    </div>
-
-    <!-- Contractors Tab -->
-    <div id="admin-contractor" style="display:none">
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
-        <input type="text" id="new-contractor-name" placeholder="שם קבלן חדש *"
-          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-        <button class="export-btn btn-report" onclick="addContractor()">➕ הוסף קבלן</button>
-      </div>
-      <div id="contractor-list" style="overflow-y:auto;max-height:45vh"></div>
-    </div>
-
-    <button class="modal-close" style="margin-top:16px" onclick="closeAdminModal()">סגור ✓</button>
+</div></div>
+<div class="ov" id="ov-a"><div class="mod">
+  <h2>&#9881;&#65039; &#1504;&#1497;&#1492;&#1493;&#1500; &#1502;&#1506;&#1512;&#1499;&#1514;</h2>
+  <div class="sub">&#1506;&#1512;&#1497;&#1499;&#1492;, &#1492;&#1493;&#1505;&#1508;&#1492; &#1493;&#1502;&#1495;&#1497;&#1511;&#1492;</div>
+  <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+    <button class="tb on" id="tb-w" onclick="swTab('w',this)">&#128119; &#1506;&#1493;&#1489;&#1491;&#1497;&#1501;</button>
+    <button class="tb" id="tb-a" onclick="swTab('a',this)">&#10133; &#1492;&#1493;&#1505;&#1507;</button>
+    <button class="tb" id="tb-c" onclick="swTab('c',this)">&#127970; &#1511;&#1489;&#1500;&#1504;&#1497;&#1501;</button>
   </div>
-</div>
-
-<!-- Edit Worker Modal -->
-<div class="modal-overlay" id="edit-modal">
-  <div class="modal" style="max-height:65vh">
-    <h2>✏️ עריכת עובד</h2>
-    <input type="hidden" id="edit-ci">
-    <input type="hidden" id="edit-wi">
-    <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
-      <input type="text" id="edit-name" placeholder="שם מלא"
-        style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-      <input type="tel" id="edit-phone" placeholder="טלפון"
-        style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-      <input type="text" id="edit-note" placeholder="הערה"
-        style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-      <div style="display:flex;gap:8px">
-        <button class="export-btn btn-report" style="flex:1" onclick="saveEdit()">💾 שמור</button>
-        <button class="export-btn" style="flex:1;background:#dc2626;color:white" onclick="deleteWorker()">🗑 מחק</button>
-      </div>
-      <button class="modal-close" onclick="document.getElementById('edit-modal').classList.remove('open')">ביטול</button>
-    </div>
+  <div id="pn-w"><input type="text" id="aq" class="inp" placeholder="&#1495;&#1497;&#1508;&#1493;&#1513;..." oninput="renderAdm()"><div id="al" style="max-height:50vh;overflow-y:auto"></div></div>
+  <div id="pn-a" style="display:none">
+    <select id="sc" class="inp" style="direction:rtl"></select>
+    <input type="text" id="nn" class="inp" placeholder="&#1513;&#1501; &#1502;&#1500;&#1488; *">
+    <input type="tel" id="np" class="inp" placeholder="&#1496;&#1500;&#1508;&#1493;&#1503; &#1504;&#1497;&#1497;&#1491;">
+    <input type="text" id="nt" class="inp" placeholder="&#1492;&#1506;&#1512;&#1492; (&#1488;&#1493;&#1508;&#1510;&#1497;&#1493;&#1504;&#1500;&#1497;)">
+    <button class="btn btn-or" style="width:100%" onclick="addW()">&#10133; &#1492;&#1493;&#1505;&#1507; &#1506;&#1493;&#1489;&#1491;</button>
+    <div id="am" style="text-align:center;font-size:13px;margin-top:8px;display:none"></div>
   </div>
-</div>
-
-<div class="modal-overlay" id="modal" onclick="closeModal(event)">
-  <div class="modal" id="modal-content">
-    <h2>📋 דוח נוכחות חירום</h2>
-    <div class="sub" id="report-time"></div>
-    <div id="report-body"></div>
-    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open'); window._refreshInterval=setInterval(()=>loadAllFromSupabase(true),10000)">סגור</button>
+  <div id="pn-c" style="display:none">
+    <input type="text" id="nc" class="inp" placeholder="&#1513;&#1501; &#1511;&#1489;&#1500;&#1503; &#1495;&#1491;&#1513; *">
+    <button class="btn btn-or" style="width:100%;margin-bottom:10px" onclick="addC()">&#10133; &#1492;&#1493;&#1505;&#1507; &#1511;&#1489;&#1500;&#1503;</button>
+    <div id="cl" style="max-height:45vh;overflow-y:auto"></div>
   </div>
-</div>
-
-<!-- Admin Password Modal -->
-<div class="modal-overlay" id="pwd-modal">
-  <div class="modal" style="max-height:50vh">
-    <h2 id="pwd-title">🔐 הזיני סיסמה</h2>
-    <div class="sub">גישה מוגבלת למנהלת המערכת</div>
-    <input type="password" id="pwd-input" placeholder="סיסמה..." 
-      style="width:100%;padding:14px;border-radius:12px;border:1px solid #334155;background:#1a2235;color:white;font-size:16px;font-family:Heebo,sans-serif;margin:12px 0;text-align:right;direction:rtl"
-      onkeydown="if(event.key==='Enter')checkPassword()">
-    <div id="pwd-error" style="color:#ef4444;font-size:13px;text-align:right;display:none">❌ סיסמה שגויה</div>
-    <div style="display:flex;gap:10px;margin-top:14px">
-      <button class="export-btn btn-report" style="flex:1" onclick="checkPassword()">כניסה</button>
-      <button class="modal-close" style="flex:1;margin-top:0" onclick="closePwdModal()">ביטול</button>
-    </div>
+  <button class="mcls" onclick="closeAdm()">&#10003; &#1505;&#1490;&#1493;&#1512; &#1493;&#1506;&#1491;&#1499;&#1503;</button>
+</div></div>
+<div class="ov" id="ov-e"><div class="mod" style="max-height:65vh">
+  <h2>&#9999;&#65039; &#1506;&#1512;&#1497;&#1499;&#1514; &#1506;&#1493;&#1489;&#1491;</h2>
+  <input type="hidden" id="eci"><input type="hidden" id="ewi">
+  <input type="text" id="en" class="inp" placeholder="&#1513;&#1501; &#1502;&#1500;&#1488;" style="margin-top:12px">
+  <input type="tel" id="ep" class="inp" placeholder="&#1496;&#1500;&#1508;&#1493;&#1503;">
+  <input type="text" id="et" class="inp" placeholder="&#1492;&#1506;&#1512;&#1492;">
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-or" style="flex:1" onclick="saveE()">&#128190; &#1513;&#1502;&#1493;&#1512;</button>
+    <button class="btn" style="flex:1;background:#dc2626;color:#fff" onclick="delW()">&#128465;&#65039; &#1502;&#1495;&#1511;</button>
   </div>
-</div>
-
-<!-- Admin Panel Modal -->
-<div class="modal-overlay" id="admin-modal">
-  <div class="modal" style="max-height:92vh;padding-bottom:20px">
-    <h2>⚙️ ניהול מערכת</h2>
-    <div class="sub">הוספה, עריכה ומחיקה של עובדים וקבלנים</div>
-
-    <!-- Tabs -->
-    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-      <button class="filter-tab active" id="tab-workers" onclick="showAdminTab('workers',this)">👷 עובדים</button>
-      <button class="filter-tab" id="tab-add" onclick="showAdminTab('add',this)">➕ הוסף עובד</button>
-      <button class="filter-tab" id="tab-contractor" onclick="showAdminTab('contractor',this)">🏢 קבלנים</button>
-    </div>
-
-    <!-- Workers Tab -->
-    <div id="admin-workers" style="overflow-y:auto;max-height:55vh">
-      <div style="margin-bottom:10px">
-        <input type="text" id="admin-search" placeholder="חיפוש עובד..." oninput="renderAdminWorkers()"
-          style="width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:13px;text-align:right;direction:rtl">
-      </div>
-      <div id="admin-workers-list"></div>
-    </div>
-
-    <!-- Add Worker Tab -->
-    <div id="admin-add" style="display:none">
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <select id="new-contractor" style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:13px;direction:rtl">
-        </select>
-        <input type="text" id="new-name" placeholder="שם מלא *" 
-          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-        <input type="tel" id="new-phone" placeholder="טלפון נייד" 
-          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-        <input type="text" id="new-note" placeholder="הערה (אופציונלי)" 
-          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-        <button class="export-btn btn-report" onclick="addWorker()">➕ הוסף עובד</button>
-        <div id="add-msg" style="text-align:center;font-size:13px;display:none"></div>
-      </div>
-    </div>
-
-    <!-- Contractors Tab -->
-    <div id="admin-contractor" style="display:none">
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
-        <input type="text" id="new-contractor-name" placeholder="שם קבלן חדש *"
-          style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-        <button class="export-btn btn-report" onclick="addContractor()">➕ הוסף קבלן</button>
-      </div>
-      <div id="contractor-list" style="overflow-y:auto;max-height:40vh"></div>
-    </div>
-
-    <button class="modal-close" style="margin-top:16px" onclick="closeAdminModal()">סגור</button>
-  </div>
-</div>
-
-<!-- Edit Worker Modal -->
-<div class="modal-overlay" id="edit-modal">
-  <div class="modal" style="max-height:60vh">
-    <h2>✏️ עריכת עובד</h2>
-    <input type="hidden" id="edit-ci">
-    <input type="hidden" id="edit-wi">
-    <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
-      <input type="text" id="edit-name" placeholder="שם מלא"
-        style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-      <input type="tel" id="edit-phone" placeholder="טלפון"
-        style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-      <input type="text" id="edit-note" placeholder="הערה"
-        style="padding:12px;border-radius:10px;border:1px solid #334155;background:#1a2235;color:white;font-family:Heebo,sans-serif;font-size:14px;text-align:right;direction:rtl">
-      <div style="display:flex;gap:8px">
-        <button class="export-btn btn-report" style="flex:1" onclick="saveEdit()">💾 שמור</button>
-        <button class="export-btn" style="flex:1;background:#dc2626;color:white" onclick="deleteWorker()">🗑 מחק</button>
-      </div>
-      <button class="modal-close" style="margin-top:4px" onclick="document.getElementById('edit-modal').classList.remove('open')">ביטול</button>
-    </div>
-  </div>
-</div>
-
+  <button class="mcls" onclick="closeOv('ov-e')">&#1489;&#1497;&#1496;&#1493;&#1500;</button>
+</div></div>
 <script>
-const contractors = [
-  {
-    name: "מתכת דביר",
-    color: "#3b82f6",
-    workers: [
-      {name:"סלבה פוזדינאקוב", phone:"050-2770614"},
-      {name:"סרגייי פוזיאנקוב", phone:"054-6810072"},
-      {name:"אמיר קרנדיאן", phone:"050-5169441"},
-      {name:"משה יצחק", phone:"054-6417063"},
-      {name:"חיים פרץ", phone:"054-5270502"},
-      {name:"בנימין אטיאס", phone:"052-8231958"},
-      {name:"אלי גרבי", phone:"053-7234166"},
-      {name:"אנדרייי ירוקוב", phone:"054-5261305"},
-      {name:"אמיר וקנין", phone:"050-2888833"},
-      {name:"אולג פרפל", phone:"050-3049519"},
-      {name:"ארתור שטיינברג", phone:"053-2248941"},
-      {name:"חיים מלכה", phone:"052-6558653"},
-      {name:"שראל שלום", phone:"053-5310901"},
-      {name:"יצחק מור", phone:"054-6220770"},
-      {name:"דניאל גוטמן", phone:"054-3520676"},
-      {name:"רומן קרשינבאום", phone:"549403177"},
-    ]
-  },
-  {
-    name: "תנועה בדרך",
-    color: "#8b5cf6",
-    workers: [
-      {name:"מיכאל אשטון", phone:"050-4868384", note:"מנהל"},
-      {name:"אלכסיי מרטינגנקו", phone:"052-6082818"},
-      {name:"יעקב כהן", phone:"050-3681010"},
-      {name:"עמוס פרג'ון", phone:"0509350043"},
-      {name:"אלכס סהר דן", phone:"052-2210080"},
-      {name:"רזבאן אנדריי", phone:"054-6975577"},
-      {name:"רוברט בגדסרוב", phone:"054-5279373"},
-      {name:"איברהים אבו סלוב", phone:"050-9279343"},
-      {name:"נאסר אבו סלוב", phone:"050-5878144"},
-      {name:"עלי אבו סלוב", phone:"054-4462968"},
-      {name:"עטיה אבו סלוב", phone:"052-7576532"},
-      {name:"יונס אבו סלוב", phone:"052-6964306"},
-      {name:"פואז אבו סלוב", phone:"050-8475545"},
-      {name:"ראשד אבו סלוב", phone:"050-9239820"},
-      {name:"פאדי אבו סלוב", phone:"052-6728314"},
-      {name:"עודה אבו סלוב", phone:"054-7439862"},
-      {name:"מרעי הוואשלה", phone:"050-4844492"},
-      {name:"ולדימיר פוסטינסקי", phone:"052-7014133", note:"שישי/שבת/חגים"},
-      {name:"דניס גרינצביץ", phone:"050-4391451", note:"שישי/שבת/חגים"},
-    ]
-  },
-  {
-    name: "ברביביי דוד",
-    color: "#f59e0b",
-    workers: [
-      {name:"ברביביי דוד", phone:"0537730958", note:"מנהל עבודה"},
-      {name:"אבו סריחן נאסר", phone:"0522629205", note:"מסגר"},
-      {name:"יפרח שי", phone:"0523331841"},
-      {name:"אבו עאייש תארק", phone:"0524566451", note:"מסגר"},
-      {name:"מליאנקר פנחס", phone:"0548150956", note:"חשמלאי"},
-      {name:"רובינוב ישי", phone:"0545727096", note:"מסגר"},
-    ]
-  },
-  {
-    name: "גסקו",
-    color: "#10b981",
-    workers: [
-      {name:"דוד זוזוט", phone:"053-5209824"},
-      {name:"אפריים בנאי", phone:"054-3492310"},
-      {name:"מאיר ברבי", phone:"053-8335917"},
-      {name:"רפאל זוזוט", phone:"053-8276638"},
-    ]
-  },
-  {
-    name: "א.ד סינון",
-    color: "#ef4444",
-    workers: [
-      {name:"אלדד בן אבו", phone:"052-689-9939"},
-      {name:"עזרא גזאי", phone:"054-5639572"},
-      {name:"יואל רחמים", phone:"050-9230526", note:"עובד מחליף"},
-    ]
-  },
-  {
-    name: "תנועה בדרך (חשמלאי הבק)",
-    color: "#a78bfa",
-    workers: [
-      {name:"שי סיביליה", phone:"050-3434207"},
-      {name:"לוין דניאל", phone:"053-3088485"},
-      {name:"ריחניאן אברהם", phone:"050-6448531"},
-      {name:"דרעי יוסי", phone:"052-6441539"},
-      {name:"פלג לירון", phone:"053-4222190"},
-      {name:"דהן שלומי", phone:"054-4988057"},
-      {name:"קדוש מישל", phone:"053-3373769"},
-      {name:"ריטון נסים", phone:"050-5202072"},
-      {name:"קרוגלוב יורי", phone:""},
-      {name:"שבדוב ולדימיר", phone:""},
-      {name:"שיר סלומון", phone:"054-8074840"},
-      {name:"בכר עמיקם", phone:"0507277499"},
-      {name:"אבו סולב ראיד", phone:""},
-      {name:"משה סויסא", phone:"054-5650809"},
-      {name:"ניק בויצנקו", phone:"052-6870058"},
-      {name:"אורי אלפסי", phone:"050-7914940"},
-      {name:"אלי מנצור", phone:"052-7586166", note:"מנוף"},
-      {name:"גל לוי", phone:"055-6624042"},
-      {name:"אריה פרידמן", phone:"054-9797236"},
-    ]
-  },
-  {
-    name: "אל-מור (חשמל)",
-    color: "#ec4899",
-    workers: [
-      {name:"חמים כהן", phone:"052-5987369"},
-      {name:"שמעון בן ישי", phone:"054-5514030"},
-      {name:"משה אדגו", phone:"052-3802171"},
-      {name:"אבירן בן סירא", phone:"054-8010645"},
-      {name:"ברהנו אורי טקא", phone:"050-8356872"},
-      {name:"אלכסנדר וינר", phone:"050-8356872"},
-    ]
-  },
-  {
-    name: "אתר תעבורה",
-    color: "#06b6d4",
-    workers: [
-      {name:"דוד זהבי", phone:"054-7912560", note:"איש קשר חירום"},
-      {name:"רפי עזרא", phone:"054-7912515"},
-      {name:"ואדי רמזי", phone:"053-9225050"},
-      {name:"מוחמד סוואעד", phone:"052-5821465"},
-      {name:"להב פואז", phone:"050-2230955"},
-      {name:"ניסים סוואעד", phone:"052-4663519"},
-      {name:"רובין ברזס", phone:"058-5690115"},
-      {name:"זיאד טארק", phone:"054-5310920"},
-      {name:"חן אשכנזי", phone:"050-8282836"},
-      {name:"נריה יחזקאל", phone:"053-4811731"},
-      {name:"סעיד אלרומלי", phone:"052-7009407", note:"קבלן"},
-      {name:"עומר אלרומלי", phone:"052-7005862", note:"קבלן"},
-    ]
-  },
-  {
-    name: "אמקו ים",
-    color: "#f97316",
-    workers: [
-      {name:"טטרואשוילי ממוקה", phone:"053-2445512"},
-      {name:"כהן יעקב", phone:"050-9310605"},
-      {name:"תורגמן חן", phone:"053-3605535"},
-      {name:"בן שועה יוסף", phone:"053-7679232"},
-      {name:"אזרוב גנאדי", phone:"052-6606204"},
-      {name:"מור בני", phone:"052-7309005"},
-      {name:"כהן יצחק", phone:"050-4214227"},
-      {name:"לייב חברט", phone:"054-6433593"},
-      {name:"טטרואשוילי שלום", phone:"053-7168889"},
-      {name:"גולדפרב מריאנה", phone:"053-7224946"},
-      {name:"אבוטבול מאיר עמוס", phone:"052-8890769"},
-      {name:"ג'ין יוסי", phone:"052-3625354"},
-      {name:"תורגמן מאיר", phone:"050-2213337"},
-      {name:"ענאני מור מרדכי", phone:"050-9308602"},
-      {name:"מוצה אסצלו", phone:"054-7225309"},
-    ]
-  },
-  {
-    name: "כיל (ICL) - עובדי חברה",
-    color: "#dc2626",
-    workers: [
-      {name:"שחר דניאלי", phone:"052-4897643"},
-      {name:"רמי וייס", phone:"052-3434278"},
-      {name:"מירב אלפסי", phone:"050-9536882"},
-      {name:"רונן אברהם", phone:"052-4420927"},
-      {name:"שלמה בונן", phone:"052-6768326"},
-      {name:"שאול דניאל", phone:"052-3927172"},
-      {name:"משה עובדיה", phone:"052-6029626"},
-      {name:"ליאור יצחקי", phone:"052-5686682"},
-      {name:"חניה צנגאוקר", phone:"054-3370184"},
-      {name:"דני אויזרט", phone:"050-5814911"},
-      {name:"מאיר חזן", phone:"054-7330753"},
-      {name:"אבירז אבלחק", phone:"054-9115???"},
-      {name:"יורם אוזונה", phone:"052-3948925"},
-      {name:"שי חיימוביץ", phone:"050-2252062"},
+var RAW=[{"name": "מתכת דביר", "color": "#3b82f6", "workers": [{"n": "סלבה פוזדינאקוב", "p": "050-2770614", "t": ""}, {"n": "סרגייי פוזיאנקוב", "p": "054-6810072", "t": ""}, {"n": "אמיר קרנדיאן", "p": "050-5169441", "t": ""}, {"n": "משה יצחק", "p": "054-6417063", "t": ""}, {"n": "חיים פרץ", "p": "054-5270502", "t": ""}, {"n": "בנימין אטיאס", "p": "052-8231958", "t": ""}, {"n": "אלי גרבי", "p": "053-7234166", "t": ""}, {"n": "אנדרייי ירוקוב", "p": "054-5261305", "t": ""}, {"n": "אמיר וקנין", "p": "050-2888833", "t": ""}, {"n": "אולג פרפל", "p": "050-3049519", "t": ""}, {"n": "ארתור שטיינברג", "p": "053-2248941", "t": ""}, {"n": "חיים מלכה", "p": "052-6558653", "t": ""}, {"n": "שראל שלום", "p": "053-5310901", "t": ""}, {"n": "יצחק מור", "p": "054-6220770", "t": ""}, {"n": "דניאל גוטמן", "p": "054-3520676", "t": ""}, {"n": "רומן קרשינבאום", "p": "549403177", "t": ""}]}, {"name": "תנועה בדרך", "color": "#8b5cf6", "workers": [{"n": "מיכאל אשטון", "p": "050-4868384", "t": "מנהל"}, {"n": "אלכסיי מרטינגנקו", "p": "052-6082818", "t": ""}, {"n": "יעקב כהן", "p": "050-3681010", "t": ""}, {"n": "עמוס פרגון", "p": "0509350043", "t": ""}, {"n": "אלכס סהר דן", "p": "052-2210080", "t": ""}, {"n": "רזבאן אנדריי", "p": "054-6975577", "t": ""}, {"n": "רוברט בגדסרוב", "p": "054-5279373", "t": ""}, {"n": "איברהים אבו סלוב", "p": "050-9279343", "t": ""}, {"n": "נאסר אבו סלוב", "p": "050-5878144", "t": ""}, {"n": "עלי אבו סלוב", "p": "054-4462968", "t": ""}, {"n": "עטיה אבו סלוב", "p": "052-7576532", "t": ""}, {"n": "יונס אבו סלוב", "p": "052-6964306", "t": ""}, {"n": "פואז אבו סלוב", "p": "050-8475545", "t": ""}, {"n": "ראשד אבו סלוב", "p": "050-9239820", "t": ""}, {"n": "פאדי אבו סלוב", "p": "052-6728314", "t": ""}, {"n": "עודה אבו סלוב", "p": "054-7439862", "t": ""}, {"n": "מרעי הוואשלה", "p": "050-4844492", "t": ""}, {"n": "ולדימיר פוסטינסקי", "p": "052-7014133", "t": "שישי/שבת/חגים"}, {"n": "דניס גרינצביץ", "p": "050-4391451", "t": "שישי/שבת/חגים"}]}, {"name": "ברביביי דוד", "color": "#f59e0b", "workers": [{"n": "ברביביי דוד", "p": "0537730958", "t": "מנהל עבודה"}, {"n": "אבו סריחן נאסר", "p": "0522629205", "t": "מסגר"}, {"n": "יפרח שי", "p": "0523331841", "t": ""}, {"n": "אבו עאייש תארק", "p": "0524566451", "t": "מסגר"}, {"n": "מליאנקר פנחס", "p": "0548150956", "t": "חשמלאי"}, {"n": "רובינוב ישי", "p": "0545727096", "t": "מסגר"}]}, {"name": "גסקו", "color": "#10b981", "workers": [{"n": "דוד זוזוט", "p": "053-5209824", "t": ""}, {"n": "אפריים בנאי", "p": "054-3492310", "t": ""}, {"n": "מאיר ברבי", "p": "053-8335917", "t": ""}, {"n": "רפאל זוזוט", "p": "053-8276638", "t": ""}]}, {"name": "א.ד סינון", "color": "#ef4444", "workers": [{"n": "אלדד בן אבו", "p": "052-689-9939", "t": ""}, {"n": "עזרא גזאי", "p": "054-5639572", "t": ""}, {"n": "יואל רחמים", "p": "050-9230526", "t": "עובד מחליף"}]}, {"name": "תנועה בדרך (חשמלאי הבק)", "color": "#a78bfa", "workers": [{"n": "שי סיביליה", "p": "050-3434207", "t": ""}, {"n": "לוין דניאל", "p": "053-3088485", "t": ""}, {"n": "ריחניאן אברהם", "p": "050-6448531", "t": ""}, {"n": "דרעי יוסי", "p": "052-6441539", "t": ""}, {"n": "פלג לירון", "p": "053-4222190", "t": ""}, {"n": "דהן שלומי", "p": "054-4988057", "t": ""}, {"n": "קדוש מישל", "p": "053-3373769", "t": ""}, {"n": "ריטון נסים", "p": "050-5202072", "t": ""}, {"n": "קרוגלוב יורי", "p": "", "t": ""}, {"n": "שבדוב ולדימיר", "p": "", "t": ""}, {"n": "שיר סלומון", "p": "054-8074840", "t": ""}, {"n": "בכר עמיקם", "p": "0507277499", "t": ""}, {"n": "אבו סולב ראיד", "p": "", "t": ""}, {"n": "משה סויסא", "p": "054-5650809", "t": ""}, {"n": "ניק בויצנקו", "p": "052-6870058", "t": ""}, {"n": "אורי אלפסי", "p": "050-7914940", "t": ""}, {"n": "אלי מנצור", "p": "052-7586166", "t": "מנוף"}, {"n": "גל לוי", "p": "055-6624042", "t": ""}, {"n": "אריה פרידמן", "p": "054-9797236", "t": ""}]}, {"name": "אל-מור (חשמל)", "color": "#ec4899", "workers": [{"n": "חמים כהן", "p": "052-5987369", "t": ""}, {"n": "שמעון בן ישי", "p": "054-5514030", "t": ""}, {"n": "משה אדגו", "p": "052-3802171", "t": ""}, {"n": "אבירן בן סירא", "p": "054-8010645", "t": ""}, {"n": "ברהנו אורי טקא", "p": "050-8356872", "t": ""}, {"n": "אלכסנדר וינר", "p": "050-8356872", "t": ""}]}, {"name": "אתר תעבורה", "color": "#06b6d4", "workers": [{"n": "דוד זהבי", "p": "054-7912560", "t": "איש קשר חירום"}, {"n": "רפי עזרא", "p": "054-7912515", "t": ""}, {"n": "ואדי רמזי", "p": "053-9225050", "t": ""}, {"n": "מוחמד סוואעד", "p": "052-5821465", "t": ""}, {"n": "להב פואז", "p": "050-2230955", "t": ""}, {"n": "ניסים סוואעד", "p": "052-4663519", "t": ""}, {"n": "רובין ברזס", "p": "058-5690115", "t": ""}, {"n": "זיאד טארק", "p": "054-5310920", "t": ""}, {"n": "חן אשכנזי", "p": "050-8282836", "t": ""}, {"n": "נריה יחזקאל", "p": "053-4811731", "t": ""}, {"n": "סעיד אלרומלי", "p": "052-7009407", "t": "קבלן"}, {"n": "עומר אלרומלי", "p": "052-7005862", "t": "קבלן"}]}, {"name": "אמקו ים", "color": "#f97316", "workers": [{"n": "טטרואשוילי ממוקה", "p": "053-2445512", "t": ""}, {"n": "כהן יעקב", "p": "050-9310605", "t": ""}, {"n": "תורגמן חן", "p": "053-3605535", "t": ""}, {"n": "בן שועה יוסף", "p": "053-7679232", "t": ""}, {"n": "אזרוב גנאדי", "p": "052-6606204", "t": ""}, {"n": "מור בני", "p": "052-7309005", "t": ""}, {"n": "כהן יצחק", "p": "050-4214227", "t": ""}, {"n": "לייב חברט", "p": "054-6433593", "t": ""}, {"n": "טטרואשוילי שלום", "p": "053-7168889", "t": ""}, {"n": "גולדפרב מריאנה", "p": "053-7224946", "t": ""}, {"n": "אבוטבול מאיר עמוס", "p": "052-8890769", "t": ""}, {"n": "ג'ין יוסי", "p": "052-3625354", "t": ""}, {"n": "תורגמן מאיר", "p": "050-2213337", "t": ""}, {"n": "ענאני מור מרדכי", "p": "050-9308602", "t": ""}, {"n": "מוצה אסצלו", "p": "054-7225309", "t": ""}]}, {"name": "כיל (ICL)", "color": "#dc2626", "workers": [{"n": "שחר דניאלי", "p": "052-4897643", "t": ""}, {"n": "רמי וייס", "p": "052-3434278", "t": ""}, {"n": "מירב אלפסי", "p": "050-9536882", "t": ""}, {"n": "רונן אברהם", "p": "052-4420927", "t": ""}, {"n": "שלמה בונן", "p": "052-6768326", "t": ""}, {"n": "שאול דניאל", "p": "052-3927172", "t": ""}, {"n": "משה עובדיה", "p": "052-6029626", "t": ""}, {"n": "ליאור יצחקי", "p": "052-5686682", "t": ""}, {"n": "חניה צנגאוקר", "p": "054-3370184", "t": ""}, {"n": "דני אויזרט", "p": "050-5814911", "t": ""}, {"n": "מאיר חזן", "p": "054-7330753", "t": ""}, {"n": "אבירז אבלחק", "p": "054-9115000", "t": ""}, {"n": "יורם אוזונה", "p": "052-3948925", "t": ""}, {"n": "שי חיימוביץ", "p": "050-2252062", "t": ""}, {"n": "עומרי מלול", "p": "050-7607570", "t": ""}, {"n": "אילן חסון", "p": "052-4679834", "t": ""}, {"n": "תומר חזן", "p": "050-8668904", "t": ""}, {"n": "ניב אנקונינה", "p": "052-5355858", "t": ""}, {"n": "אמין אלסייד", "p": "054-9261660", "t": ""}, {"n": "אורן פרנפס", "p": "052-2805160", "t": ""}]}, {"name": "ברנאש", "color": "#16a34a", "workers": [{"n": "כפיר לוי", "p": "050-4660550", "t": ""}, {"n": "אלי דרעי", "p": "053-8325059", "t": ""}, {"n": "יקיר דרעי", "p": "050-4312540", "t": ""}, {"n": "יניב עמוס", "p": "055-5569033", "t": ""}, {"n": "גלה שוביטיזה", "p": "058-4666684", "t": ""}, {"n": "רונן עזרן", "p": "052-6925695", "t": ""}, {"n": "אלון סגל", "p": "052-2090033", "t": ""}, {"n": "מיכאל שטרן", "p": "054-6440498", "t": ""}, {"n": "דניאל מגרלשוילי", "p": "050-5986589", "t": ""}, {"n": "ליאור בן טולילה", "p": "052-7161100", "t": ""}, {"n": "ישראל טלקר", "p": "054-8836088", "t": ""}, {"n": "משה שמליקשוילי", "p": "050-7808944", "t": ""}, {"n": "אבי באייב", "p": "053-2382359", "t": ""}, {"n": "משה שמר", "p": "050-9349518", "t": ""}, {"n": "גיזת וורקא", "p": "058-6321374", "t": ""}, {"n": "ביסואס דיבויית", "p": "050-6320603", "t": ""}]}, {"name": "ברן", "color": "#1d4ed8", "workers": [{"n": "קין בדלוב", "p": "054-7842947", "t": ""}, {"n": "נאור עזרא", "p": "050-9139137", "t": ""}, {"n": "מתן לוי", "p": "050-8580752", "t": ""}, {"n": "שמעון אלבז", "p": "054-5245163", "t": "איש קשר לחירום"}, {"n": "יעקב נחום", "p": "054-2769765", "t": ""}, {"n": "שאול יחיא", "p": "054-2828273", "t": ""}]}, {"name": "עובדים נוספים", "color": "#64748b", "workers": [{"n": "אילן שלומאי", "p": "052-5553811", "t": ""}, {"n": "קלאודיו", "p": "058-7047322", "t": ""}]}];
 
-      {name:"עומרי מלול", phone:"050-7607570"},
-      {name:"אילן חסון", phone:"052-4679834"},
-      {name:"תומר חזן", phone:"050-8668904"},
-      {name:"ניב אנקונינה", phone:"052-5355858"},
-      {name:"אמין אלסייד", phone:"054-9261660"},
-      {name:"אורן פרנפס", phone:"052-2805160"},
-    ]
-  },
-  {
-    name: "ברנאש",
-    color: "#16a34a",
-    workers: [
-      {name:"כפיר לוי", phone:"050-4660550"},
-      {name:"אלי דרעי", phone:"053-8325059"},
-      {name:"יקיר דרעי", phone:"050-4312540"},
-      {name:"יניב עמוס", phone:"055-5569033"},
-      {name:"גלה שוביטיזה", phone:"058-4666684"},
-      {name:"רונן עזרן", phone:"052-6925695"},
-      {name:"אלון סגל", phone:"052-2090033"},
-      {name:"מיכאל שטרן", phone:"054-6440498"},
-      {name:"דניאל מגרלשוילי", phone:"050-5986589"},
-      {name:"ליאור בן טולילה", phone:"052-7161100"},
-      {name:"ישראל טלקר", phone:"054-8836088"},
-      {name:"משה שמליקשוילי", phone:"050-7808944"},
-      {name:"אבי באייב", phone:"053-2382359"},
-      {name:"משה שמר", phone:"050-9349518"},
-      {name:"גיזת וורקא", phone:"058-6321374"},
-      {name:"ביסואס דיבויית", phone:"050-6320603"},
-    ]
-  },
-  {
-    name: "ברן",
-    color: "#1d4ed8",
-    workers: [
-      {name:"קין בדלוב",  phone:"054-7842947"},
-      {name:"נאור עזרא",  phone:"050-9139137"},
-      {name:"מתן לוי",    phone:"050-8580752"},
-      {name:"שמעון אלבז", phone:"054-5245163", note:"⚠️ איש קשר לחירום"},
-      {name:"יעקב נחום",  phone:"054-2769765"},
-      {name:"שאול יחיא",  phone:"054-2828273"},
-    ]
-  },
-  {
-    name: "עובדים נוספים",
-    color: "#64748b",
-    workers: [
-      {name:"אילן שלומאי", phone:"052-5553811"},
-      {name:"קלאודיו",     phone:"058-7047322"},
-    ]
-  },
-];
+var C = RAW.map(function(c) {
+  return {
+    name: c.name, color: c.color,
+    workers: c.workers.map(function(w) {
+      return {name: w.n, phone: w.p || "", note: w.t || ""};
+    })
+  };
+});
 
-// State: {workerKey: 'present'|'absent'|null}
-const state = {};
-const stateOk = {}; // סיום חירום - מצב תקין
-let currentFilter = 'all';
+var ST = {}, OK = {};
+var filt = "all", pendAct = null, refTmr = null;
+var PASS = "Liya262020";
+var SB = "https://qyodkpdwtqazlzdvzolg.supabase.co";
+var SK = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5b2RrcGR3dHFhemx6ZHZ6b2xnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MDQ5MjUsImV4cCI6MjA5NjQ4MDkyNX0.bvLOUTpy2TobwO3KKMfm_1MmOdTPn0tqC6R0YadmQXo";
 
-function workerKey(cIdx, wIdx) { return `${cIdx}_${wIdx}`; }
+function key(ci,wi) { return ci+"_"+wi; }
 
-function updateStats() {
-  let total=0, present=0, absent=0;
-  contractors.forEach((c,ci) => c.workers.forEach((_,wi) => {
-    total++;
-    const s = state[workerKey(ci,wi)];
-    if(s==='present') present++;
-    else if(s==='absent') absent++;
-  }));
-  const unknown = total - present - absent;
-  document.getElementById('s-total').textContent = total;
-  document.getElementById('s-present').textContent = present;
-  document.getElementById('s-absent').textContent = absent;
-  document.getElementById('s-unknown').textContent = unknown;
-  const pct = total > 0 ? Math.round(present/total*100) : 0;
-  document.getElementById('progress').style.width = pct + '%';
-  // Update section mini stats
-  contractors.forEach((c,ci) => {
-    let cp=0, ca=0;
-    c.workers.forEach((_,wi) => {
-      const s = state[workerKey(ci,wi)];
-      if(s==='present') cp++;
-      else if(s==='absent') ca++;
+var toastEl = null, toastTmr = null;
+function toast(m,bg,col,br) {
+  if(!toastEl) toastEl = document.getElementById("tst");
+  bg=bg||"#166534"; col=col||"#4ade80"; br=br||"#22c55e";
+  toastEl.textContent=m; toastEl.style.background=bg;
+  toastEl.style.color=col; toastEl.style.border="1px solid "+br;
+  toastEl.style.display="block";
+  clearTimeout(toastTmr);
+  toastTmr=setTimeout(function(){toastEl.style.display="none";},2000);
+}
+
+var dotEl = null;
+function setDot(ok) {
+  if(!dotEl) dotEl=document.getElementById("conn");
+  dotEl.style.background=ok?"#22c55e":"#ef4444";
+  dotEl.style.boxShadow=ok?"0 0 6px #22c55e":"0 0 6px #ef4444";
+}
+
+function sbSave(ci,wi) {
+  var k=key(ci,wi);
+  var body = JSON.stringify({id:k, status:ST[k]||null, ok:!!OK[k], updated_at:new Date().toISOString()});
+  fetch(SB+"/rest/v1/checkin", {
+    method:"POST",
+    headers:{"Content-Type":"application/json","apikey":SK,"Authorization":"Bearer "+SK,"Prefer":"resolution=merge-duplicates"},
+    body:body
+  }).then(function(){setDot(true);toast("\u2713 \u05e0\u05e9\u05de\u05e8");})
+  .catch(function(){setDot(false);toast("\u26a0 \u05e9\u05d2\u05d9\u05d0\u05d4","#7f1d1d","#fca5a5","#ef4444");});
+}
+
+function sbLoad(silent) {
+  fetch(SB+"/rest/v1/checkin?select=id,status,ok", {
+    headers:{"apikey":SK,"Authorization":"Bearer "+SK}
+  }).then(function(r){return r.json();})
+  .then(function(rows) {
+    Object.keys(ST).forEach(function(k){delete ST[k];});
+    Object.keys(OK).forEach(function(k){delete OK[k];});
+    rows.forEach(function(row){
+      if(row.status) ST[row.id]=row.status;
+      if(row.ok) OK[row.id]=true;
     });
-    const el = document.getElementById(`section-stats-${ci}`);
-    if(el) el.innerHTML = `<span class="mini-stat g">✓${cp}</span><span class="mini-stat r">✗${ca}</span>`;
+    C.forEach(function(c,ci){c.workers.forEach(function(_,wi){refreshRow(ci,wi);});});
+    updStats(); doFilter();
+    setDot(true);
+    if(!silent) toast("\u2713 \u05e0\u05d8\u05e2\u05df");
+  }).catch(function(){setDot(false);});
+}
+
+function startRef(){refTmr=setInterval(function(){sbLoad(true);},10000);}
+function stopRef(){if(refTmr){clearInterval(refTmr);refTmr=null;}}
+
+function updStats() {
+  var tot=0,pr=0,ab=0;
+  C.forEach(function(c,ci){
+    c.workers.forEach(function(_,wi){
+      tot++;
+      var s=ST[key(ci,wi)];
+      if(s==="yes") pr++; else if(s==="no") ab++;
+    });
+  });
+  document.getElementById("st").textContent=tot;
+  document.getElementById("sp").textContent=pr;
+  document.getElementById("sa").textContent=ab;
+  document.getElementById("su").textContent=tot-pr-ab;
+  document.getElementById("pf").style.width=(tot?Math.round(pr/tot*100):0)+"%";
+  C.forEach(function(c,ci){
+    var cp=0,ca=0;
+    c.workers.forEach(function(_,wi){
+      var s=ST[key(ci,wi)];
+      if(s==="yes") cp++; else if(s==="no") ca++;
+    });
+    var el=document.getElementById("ss"+ci);
+    if(el) el.innerHTML="<span style='color:#22c55e;font-weight:700;font-size:12px'>\u2713"+cp+"</span>&nbsp;<span style='color:#ef4444;font-weight:700;font-size:12px'>\u2717"+ca+"</span>";
   });
 }
 
-function toggleOk(ci, wi) {
-  const k = workerKey(ci, wi);
-  if(stateOk[k]) delete stateOk[k];
-  else stateOk[k] = true;
-  renderWorkerRow(ci, wi);
-}
-
-function toggle(ci, wi, val) {
-  const k = workerKey(ci,wi);
-  if(state[k]===val) delete state[k];
-  else state[k]=val;
-  renderWorkerRow(ci, wi);
-  updateStats();
-  filterWorkers();
-}
-
-function renderWorkerRow(ci, wi) {
-  const w = contractors[ci].workers[wi];
-  const k = workerKey(ci,wi);
-  const s = state[k];
-  const row = document.getElementById(`row-${ci}-${wi}`);
+function refreshRow(ci,wi) {
+  var row=document.getElementById("r"+ci+"_"+wi);
   if(!row) return;
-  row.className = 'worker-row' + (s==='present'?' present':s==='absent'?' absent':'');
-  const btnY = row.querySelector('.btn-yes');
-  const btnN = row.querySelector('.btn-no');
-  if(btnY) btnY.className = 'btn-check btn-yes' + (s==='present'?' active':'');
-  if(btnN) btnN.className = 'btn-check btn-no' + (s==='absent'?' active':'');
-  const btnOk = row.querySelector('.btn-ok');
-  if(btnOk) btnOk.className = 'btn-check btn-ok' + (stateOk[k]?' active':'');
-  const okBadge = row.querySelector('.ok-badge');
-  if(okBadge) okBadge.className = 'ok-badge' + (stateOk[k]?' show':'');
+  var k=key(ci,wi), s=ST[k];
+  row.className="wrow"+(s==="yes"?" yes":s==="no"?" no":"");
+  var by=row.querySelector(".by"); if(by) by.className="bc by"+(s==="yes"?" on":"");
+  var bn=row.querySelector(".bn"); if(bn) bn.className="bc bn"+(s==="no"?" on":"");
+  var bok=row.querySelector(".bok"); if(bok) bok.className="bc bok"+(OK[k]?" on":"");
+  var okb=row.querySelector(".okb"); if(okb) okb.className="okb"+(OK[k]?" on":"");
+}
+
+function tog(ci,wi,v) {
+  var k=key(ci,wi);
+  if(ST[k]===v) delete ST[k]; else ST[k]=v;
+  refreshRow(ci,wi); updStats(); doFilter(); sbSave(ci,wi);
+}
+function togOk(ci,wi) {
+  var k=key(ci,wi);
+  if(OK[k]) delete OK[k]; else OK[k]=true;
+  refreshRow(ci,wi); sbSave(ci,wi);
 }
 
 function buildUI() {
-  const container = document.getElementById('contractors-container');
-  container.innerHTML = '';
-  contractors.forEach((c, ci) => {
-    const section = document.createElement('div');
-    section.className = 'contractor-section';
-    section.id = `section-${ci}`;
-
-    section.innerHTML = `
-      <div class="contractor-header" onclick="toggleSection(${ci})">
-        <div class="contractor-left">
-          <div class="contractor-dot" style="background:${c.color}"></div>
-          <div>
-            <div class="contractor-name">${c.name}</div>
-            <div class="contractor-meta">${c.workers.length} עובדים</div>
-          </div>
-        </div>
-        <div class="contractor-right">
-          <div id="section-stats-${ci}" style="display:flex;gap:8px">
-            <span class="mini-stat g">✓0</span><span class="mini-stat r">✗0</span>
-          </div>
-          <span class="chevron" id="chevron-${ci}">▼</span>
-        </div>
-      </div>
-      <div class="workers-list open" id="list-${ci}"></div>
-    `;
-    container.appendChild(section);
-
-    const list = document.getElementById(`list-${ci}`);
-    c.workers.forEach((w, wi) => {
-      const row = document.createElement('div');
-      row.className = 'worker-row';
-      row.id = `row-${ci}-${wi}`;
-      row.dataset.name = w.name;
-      row.dataset.phone = w.phone || '';
-      row.dataset.ci = ci;
-      row.dataset.wi = wi;
-      const phoneLink = w.phone ? `<a class="call-btn" href="tel:${w.phone}">📞</a>` : `<div class="call-btn" style="opacity:0.3">📞</div>`;
-      row.innerHTML = `
-        <div class="worker-info">
-          <div class="worker-name">${w.name}</div>
-          <div class="worker-phone">${w.phone || '—'}</div>
-          ${w.note ? `<div class="worker-note">${w.note}</div>` : ''}
-        </div>
-        <div class="btn-group">
-          <button class="btn-check btn-yes" onclick="toggle(${ci},${wi},'present')" title="נוכח">✓</button>
-          <button class="btn-check btn-no" onclick="toggle(${ci},${wi},'absent')" title="חסר">✗</button>
-          <button class="btn-check btn-ok" onclick="toggleOk(${ci},${wi})" title="מצב תקין בסיום חירום">🛡</button>
-          ${phoneLink}
-        </div>
-      `;
-      // add ok-badge inside worker-info
-      row.querySelector('.worker-info').insertAdjacentHTML('beforeend', '<span class="ok-badge">🛡 בטוח | מצב תקין</span>');
-      list.appendChild(row);
+  var mc=document.getElementById("mc"); mc.innerHTML="";
+  C.forEach(function(c,ci) {
+    var sec=document.createElement("div");
+    sec.className="sec"; sec.id="s"+ci;
+    sec.innerHTML=
+      "<div class='sec-hdr' onclick='togSec("+ci+")'>"+
+        "<div class='sec-l'>"+
+          "<div class='dot' style='background:"+c.color+"'></div>"+
+          "<div><div class='sec-name'>"+c.name+"</div>"+
+          "<div class='sec-sub'>"+c.workers.length+" \u05e2\u05d5\u05d1\u05d3\u05d9\u05dd</div></div>"+
+        "</div>"+
+        "<div class='sec-r'>"+
+          "<div id='ss"+ci+"' style='display:flex;gap:6px'></div>"+
+          "<span class='chv op' id='cv"+ci+"'>&#9660;</span>"+
+        "</div>"+
+      "</div>"+
+      "<div class='wlist op' id='wl"+ci+"'></div>";
+    mc.appendChild(sec);
+    var wl=document.getElementById("wl"+ci);
+    c.workers.forEach(function(w,wi) {
+      var row=document.createElement("div");
+      row.className="wrow"; row.id="r"+ci+"_"+wi;
+      var ph=w.phone?"<a class='ca' href='tel:"+w.phone+"'>&#128222;</a>":"<div class='ca' style='opacity:.3'>&#128222;</div>";
+      row.innerHTML=
+        "<div class='wi'>"+
+          "<div class='wn'>"+w.name+"</div>"+
+          "<div class='wp'>"+(w.phone||"\u2014")+"</div>"+
+          (w.note?"<div class='wt'>"+w.note+"</div>":"")+
+          "<span class='okb'>\ud83d\udee1 \u05d1\u05d8\u05d5\u05d7 | \u05de\u05e6\u05d1 \u05ea\u05e7\u05d9\u05df</span>"+
+        "</div>"+
+        "<div class='btns'>"+
+          "<button class='bc by' onclick='tog("+ci+","+wi+",\"yes\")'>&#10003;</button>"+
+          "<button class='bc bn' onclick='tog("+ci+","+wi+",\"no\")'>&#10007;</button>"+
+          "<button class='bc bok' onclick='togOk("+ci+","+wi+")'>&#128737;</button>"+
+          ph+
+        "</div>";
+      wl.appendChild(row);
     });
   });
-  updateStats();
+  updStats();
 }
 
-function toggleSection(ci) {
-  const list = document.getElementById(`list-${ci}`);
-  const chevron = document.getElementById(`chevron-${ci}`);
-  list.classList.toggle('open');
-  chevron.classList.toggle('open');
+function togSec(ci) {
+  document.getElementById("wl"+ci).classList.toggle("op");
+  document.getElementById("cv"+ci).classList.toggle("op");
 }
 
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  filterWorkers();
+function setF(f,btn) {
+  filt=f;
+  document.querySelectorAll(".ftab").forEach(function(b){b.className="ftab";});
+  btn.className="ftab on";
+  doFilter();
 }
 
-function filterWorkers() {
-  const q = document.getElementById('search').value.trim().toLowerCase();
-  contractors.forEach((c, ci) => {
-    let anyVisible = false;
-    c.workers.forEach((w, wi) => {
-      const row = document.getElementById(`row-${ci}-${wi}`);
-      if(!row) return;
-      const k = workerKey(ci, wi);
-      const s = state[k] || 'unknown';
-      const matchFilter =
-        currentFilter==='all' ||
-        (currentFilter==='present' && s==='present') ||
-        (currentFilter==='absent' && s==='absent') ||
-        (currentFilter==='unknown' && !state[k]);
-      const matchSearch = !q || w.name.includes(q) || (w.phone||'').includes(q);
-      const show = matchFilter && matchSearch;
-      row.style.display = show ? '' : 'none';
-      if(show) anyVisible = true;
+function doFilter() {
+  var q=document.getElementById("sq").value.trim().toLowerCase();
+  C.forEach(function(c,ci) {
+    var any=false;
+    c.workers.forEach(function(w,wi) {
+      var row=document.getElementById("r"+ci+"_"+wi); if(!row) return;
+      var s=ST[key(ci,wi)]||"uk";
+      var mf=(filt==="all")||(filt==="yes"&&s==="yes")||(filt==="no"&&s==="no")||(filt==="uk"&&!ST[key(ci,wi)]);
+      var ms=!q||w.name.indexOf(q)>=0||w.phone.indexOf(q)>=0;
+      var show=mf&&ms; row.style.display=show?"":"none"; if(show) any=true;
     });
-    const section = document.getElementById(`section-${ci}`);
-    if(section) section.style.display = anyVisible ? '' : 'none';
+    var sec=document.getElementById("s"+ci); if(sec) sec.style.display=any?"":"none";
   });
 }
 
-function openReport() {
-  // עצור רענון אוטומטי בזמן שהדוח פתוח
-  if(window._refreshInterval) clearInterval(window._refreshInterval);
+function openOv(id){document.getElementById(id).classList.add("op");}
+function closeOv(id){document.getElementById(id).classList.remove("op");}
 
-  const now = new Date();
-  document.getElementById('report-time').textContent =
-    `תאריך: ${now.toLocaleDateString('he-IL')}  |  שעה: ${now.toLocaleTimeString('he-IL')}`;
-
-  let html = '';
-  let totalP=0, totalA=0, totalU=0;
-
-  contractors.forEach((c,ci) => {
-    let cp=[], ca=[], cu=[];
-    c.workers.forEach((w,wi) => {
-      const s = state[workerKey(ci,wi)];
-      if(s==='present') cp.push(w);
-      else if(s==='absent') ca.push(w);
-      else cu.push(w);
+function showRpt() {
+  stopRef();
+  var now=new Date();
+  document.getElementById("rt").textContent=now.toLocaleDateString("he-IL")+" | "+now.toLocaleTimeString("he-IL");
+  var html="", tp=0, ta=0, tu=0;
+  C.forEach(function(c,ci) {
+    var cp=[],ca=[],cu=[];
+    c.workers.forEach(function(w,wi){
+      var s=ST[key(ci,wi)];
+      if(s==="yes") cp.push({w:w,wi:wi});
+      else if(s==="no") ca.push({w:w,wi:wi});
+      else cu.push({w:w,wi:wi});
     });
-    totalP+=cp.length; totalA+=ca.length; totalU+=cu.length;
-
-    html += `<div class="report-section-title" style="color:${c.color}">${c.name} (${c.workers.length})</div>`;
-    [...cp.map(w=>({w,s:'present'})), ...ca.map(w=>({w,s:'absent'})), ...cu.map(w=>({w,s:'unknown'}))].forEach(({w,s})=>{
-      html += `<div class="report-line">
-        <span>${w.name}</span>
-        <span style="display:flex;gap:6px;align-items:center">
-          <span class="badge ${s==='present'?'p':s==='absent'?'a':'u'}">${s==='present'?'נוכח':s==='absent'?'חסר':'?'}</span>
-          ${stateOk[workerKey(ci,wi)] ? '<span class="badge" style="background:linear-gradient(135deg,#14532d,#166534);color:#4ade80;border:1px solid #22c55e">🛡 בטוח</span>' : ''}
-        </span>
-      </div>`;
+    tp+=cp.length; ta+=ca.length; tu+=cu.length;
+    html+="<div class='rs' style='color:"+c.color+"'>"+c.name+" ("+c.workers.length+")</div>";
+    cp.concat(ca).concat(cu).forEach(function(x) {
+      var si=cp.indexOf(x)>=0?"yes":ca.indexOf(x)>=0?"no":"uk";
+      var b=si==="yes"?"<span class='bdg bdg-p'>\u05e0\u05d5\u05db\u05d7</span>":si==="no"?"<span class='bdg bdg-a'>\u05d7\u05e1\u05e8</span>":"<span class='bdg bdg-u'>?</span>";
+      var ob=OK[key(ci,x.wi)]?"<span class='bdg bdg-ok'>\ud83d\udee1</span>":"";
+      html+="<div class='rl'><span>"+x.w.name+"</span><span style='display:flex;gap:5px'>"+b+ob+"</span></div>";
     });
   });
-
-  html = `<div class="report-line" style="font-weight:700;font-size:15px">
-    <span>סה"כ: ${totalP+totalA+totalU}</span>
-    <span><span style="color:#22c55e">✓${totalP}</span> &nbsp; <span style="color:#ef4444">✗${totalA}</span> &nbsp; <span style="color:#eab308">?${totalU}</span></span>
-  </div>` + html;
-
-  document.getElementById('report-body').innerHTML = html;
-  document.getElementById('modal').classList.add('open');
+  var sum="<div class='rl' style='font-weight:700;font-size:15px;border-top:2px solid var(--accent);margin-bottom:6px'>"+
+    "<span>\u05e1\u05d4\"\u05db: "+(tp+ta+tu)+"</span>"+
+    "<span><span style='color:#22c55e'>\u2713"+tp+"</span>&nbsp;<span style='color:#ef4444'>\u2717"+ta+"</span>&nbsp;<span style='color:#eab308'>?"+tu+"</span></span></div>";
+  document.getElementById("rb").innerHTML=sum+html;
+  openOv("ov-r");
 }
 
-function closeModal(e) {
-  if(e.target.id==='modal') {
-    document.getElementById('modal').classList.remove('open');
-    // חדש את הרענון האוטומטי
-    window._refreshInterval = setInterval(() => loadAllFromSupabase(true), 10000);
+function askPwd(action) {
+  pendAct=action;
+  document.getElementById("pi").value="";
+  document.getElementById("pe").style.display="none";
+  openOv("ov-p");
+  setTimeout(function(){document.getElementById("pi").focus();},300);
+}
+function chkPwd() {
+  if(document.getElementById("pi").value===PASS) {
+    closeOv("ov-p");
+    if(pendAct==="rst") doRst(); else openAdm();
+  } else {
+    document.getElementById("pe").style.display="block";
+    document.getElementById("pi").value="";
   }
 }
 
-function resetAll() {
-  if(!confirm('לאפס את כל הסימונים?')) return;
-  Object.keys(state).forEach(k => delete state[k]);
-  contractors.forEach((c,ci) => c.workers.forEach((_,wi) => renderWorkerRow(ci,wi)));
-  updateStats();
-}
-
-function updateClock() {
-  const now = new Date();
-  document.getElementById('datetime').innerHTML =
-    `<strong>${now.toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'})}</strong><br>${now.toLocaleDateString('he-IL')}`;
-}
-
-// ---- Supabase - סנכרון בזמן אמת בין כל המכשירים ----
-const SUPA_URL = 'https://qyodkpdwtqazlzdvzolg.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5b2RrcGR3dHFhemx6ZHZ6b2xnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MDQ5MjUsImV4cCI6MjA5NjQ4MDkyNX0.bvLOUTpy2TobwO3KKMfm_1MmOdTPn0tqC6R0YadmQXo';
-
-const HEADERS = {
-  'Content-Type': 'application/json',
-  'apikey': SUPA_KEY,
-  'Authorization': 'Bearer ' + SUPA_KEY,
-  'Prefer': 'resolution=merge-duplicates'
-};
-
-// הודעת סטטוס
-const savedMsg = document.createElement('div');
-savedMsg.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;display:none;font-family:Heebo,sans-serif;transition:all 0.3s';
-document.body.appendChild(savedMsg);
-
-let saveTimer;
-function showMsg(text, color='#166534', textColor='#4ade80', border='#22c55e') {
-  savedMsg.style.background = color;
-  savedMsg.style.color = textColor;
-  savedMsg.style.border = '1px solid ' + border;
-  savedMsg.textContent = text;
-  savedMsg.style.display = 'block';
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => savedMsg.style.display = 'none', 2000);
-}
-
-// מחוון חיבור
-const connDot = document.createElement('div');
-connDot.style.cssText = 'position:fixed;top:8px;left:12px;width:10px;height:10px;border-radius:50%;background:#eab308;z-index:999;box-shadow:0 0 6px #eab308';
-connDot.title = 'מתחבר...';
-document.body.appendChild(connDot);
-function setConn(ok) {
-  connDot.style.background = ok ? '#22c55e' : '#ef4444';
-  connDot.style.boxShadow = ok ? '0 0 6px #22c55e' : '0 0 6px #ef4444';
-  connDot.title = ok ? 'מחובר לענן ✓' : 'אין חיבור';
-}
-
-async function saveRow(key, status, ok) {
-  try {
-    const res = await fetch(`${SUPA_URL}/rest/v1/checkin`, {
-      method: 'POST',
-      headers: HEADERS,
-      body: JSON.stringify({ id: key, status: status || null, ok: ok || false, updated_at: new Date().toISOString() })
+function doRst() {
+  if(!confirm("\u05dc\u05d0\u05e4\u05e1 \u05e1\u05d9\u05de\u05d5\u05e0\u05d9\u05dd?")) return;
+  Object.keys(ST).forEach(function(k){delete ST[k];});
+  Object.keys(OK).forEach(function(k){delete OK[k];});
+  C.forEach(function(c,ci){c.workers.forEach(function(_,wi){refreshRow(ci,wi);});});
+  updStats(); doFilter(); toast("\u2713 \u05de\u05d0\u05e4\u05e1...");
+  fetch(SB+"/rest/v1/checkin?select=id",{headers:{"apikey":SK,"Authorization":"Bearer "+SK}})
+  .then(function(r){return r.json();})
+  .then(function(rows){
+    if(!rows||!rows.length) return;
+    var ids=rows.map(function(r){return r.id;}).join(",");
+    return fetch(SB+"/rest/v1/checkin?id=in.("+ids+")",{
+      method:"DELETE",headers:{"apikey":SK,"Authorization":"Bearer "+SK}
     });
-    if (res.ok) { setConn(true); showMsg('✓ נשמר בענן'); }
-    else { setConn(false); showMsg('⚠ שגיאה בשמירה','#7f1d1d','#fca5a5','#ef4444'); }
-  } catch(e) { setConn(false); showMsg('⚠ אין חיבור','#7f1d1d','#fca5a5','#ef4444'); }
+  }).then(function(){toast("\u2713 \u05d0\u05d5\u05e4\u05e1 \u05d1\u05e2\u05e0\u05df");})
+  .catch(function(){});
 }
 
-async function loadAllFromSupabase(silent = false) {
-  try {
-    const res = await fetch(`${SUPA_URL}/rest/v1/checkin?select=id,status,ok`, { headers: HEADERS });
-    if (!res.ok) { setConn(false); return; }
-    const rows = await res.json();
-    rows.forEach(row => {
-      if (row.status) state[row.id] = row.status;
-      else delete state[row.id];
-      if (row.ok) stateOk[row.id] = true;
-      else delete stateOk[row.id];
+function openAdm() {
+  stopRef();
+  document.getElementById("sc").innerHTML=C.map(function(c,i){return "<option value='"+i+"'>"+c.name+"</option>";}).join("");
+  swTab("w",document.getElementById("tb-w"));
+  openOv("ov-a");
+}
+function closeAdm() {
+  closeOv("ov-a");
+  document.getElementById("mc").innerHTML="";
+  buildUI();
+  C.forEach(function(c,ci){c.workers.forEach(function(_,wi){refreshRow(ci,wi);});});
+  updStats(); doFilter(); startRef();
+}
+function swTab(t,btn) {
+  ["w","a","c"].forEach(function(x){document.getElementById("pn-"+x).style.display=x===t?"":"none";});
+  document.querySelectorAll(".tb").forEach(function(b){b.className="tb";});
+  btn.className="tb on";
+  if(t==="w") renderAdm();
+  if(t==="c") renderCL();
+}
+function renderAdm() {
+  var q=(document.getElementById("aq").value||"").toLowerCase();
+  var html="";
+  C.forEach(function(c,ci){
+    var fl=c.workers.map(function(w,wi){return {w:w,wi:wi};}).filter(function(x){return !q||x.w.name.indexOf(q)>=0||x.w.phone.indexOf(q)>=0;});
+    if(!fl.length) return;
+    html+="<div style='font-size:11px;font-weight:700;color:"+c.color+";padding:8px 0 4px;border-bottom:1px solid var(--border)'>"+c.name+"</div>";
+    fl.forEach(function(x){
+      html+="<div style='display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)'>"+
+        "<div><div style='font-size:13px;font-weight:600'>"+x.w.name+"</div>"+
+        "<div style='font-size:11px;color:var(--muted)'>"+(x.w.phone||"\u2014")+(x.w.note?" | "+x.w.note:"")+"</div></div>"+
+        "<button onclick='openE("+ci+","+x.wi+")' style='padding:5px 12px;background:#1e40af;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer'>\u270f\ufe0f \u05e2\u05e8\u05d9\u05db\u05d4</button>"+
+        "</div>";
     });
-    contractors.forEach((c,ci) => c.workers.forEach((_,wi) => renderWorkerRow(ci,wi)));
-    updateStats();
-    setConn(true);
-    if (!silent) showMsg('✓ נטען מהענן');
-  } catch(e) { setConn(false); }
+  });
+  document.getElementById("al").innerHTML=html||"<div style='color:var(--muted);text-align:center;padding:20px'>\u05dc\u05d0 \u05e0\u05de\u05e6\u05d0\u05d5</div>";
+}
+function openE(ci,wi) {
+  var w=C[ci].workers[wi];
+  document.getElementById("eci").value=ci; document.getElementById("ewi").value=wi;
+  document.getElementById("en").value=w.name;
+  document.getElementById("ep").value=w.phone||"";
+  document.getElementById("et").value=w.note||"";
+  openOv("ov-e");
+}
+function saveE() {
+  var ci=+document.getElementById("eci").value, wi=+document.getElementById("ewi").value;
+  C[ci].workers[wi].name=document.getElementById("en").value.trim();
+  C[ci].workers[wi].phone=document.getElementById("ep").value.trim();
+  C[ci].workers[wi].note=document.getElementById("et").value.trim();
+  closeOv("ov-e"); renderAdm(); toast("\u2713 \u05e0\u05e9\u05de\u05e8");
+}
+function delW() {
+  var ci=+document.getElementById("eci").value, wi=+document.getElementById("ewi").value;
+  if(!confirm("\u05dc\u05de\u05d7\u05d5\u05e7?")) return;
+  C[ci].workers.splice(wi,1);
+  closeOv("ov-e"); renderAdm();
+}
+function addW() {
+  var ci=+document.getElementById("sc").value;
+  var name=document.getElementById("nn").value.trim();
+  var phone=document.getElementById("np").value.trim();
+  var note=document.getElementById("nt").value.trim();
+  var msg=document.getElementById("am");
+  if(!name){msg.style.display="block";msg.style.color="var(--red)";msg.textContent="\u26a0 \u05e0\u05d0 \u05dc\u05d4\u05d6\u05d9\u05df \u05e9\u05dd";return;}
+  C[ci].workers.push({name:name,phone:phone,note:note});
+  document.getElementById("nn").value=""; document.getElementById("np").value=""; document.getElementById("nt").value="";
+  msg.style.display="block"; msg.style.color="#4ade80";
+  msg.textContent="\u2713 "+name+" \u05e0\u05d5\u05e1\u05e3";
+  setTimeout(function(){msg.style.display="none";},3000);
+}
+function renderCL() {
+  var html="";
+  C.forEach(function(c,ci){
+    html+="<div style='display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)'>"+
+      "<div style='display:flex;align-items:center;gap:8px'>"+
+      "<div style='width:11px;height:11px;border-radius:50%;background:"+c.color+"'></div>"+
+      "<div><div style='font-size:13px;font-weight:600'>"+c.name+"</div>"+
+      "<div style='font-size:11px;color:var(--muted)'>"+c.workers.length+" \u05e2\u05d5\u05d1\u05d3\u05d9\u05dd</div></div></div>"+
+      "<button onclick='delC("+ci+")' style='padding:5px 12px;background:#7f1d1d;color:#fca5a5;border:none;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer'>\u05de\u05d7\u05e7</button>"+
+      "</div>";
+  });
+  document.getElementById("cl").innerHTML=html;
+}
+function addC() {
+  var name=document.getElementById("nc").value.trim(); if(!name) return;
+  var cols=["#1E40AF","#15803D","#7C3AED","#B45309","#DC2626","#0891B2","#475569"];
+  C.push({name:name,color:cols[C.length%cols.length],workers:[]});
+  document.getElementById("nc").value="";
+  document.getElementById("sc").innerHTML=C.map(function(c,i){return "<option value='"+i+"'>"+c.name+"</option>";}).join("");
+  renderCL();
+}
+function delC(ci) {
+  if(!confirm("\u05dc\u05de\u05d7\u05d5\u05e7?")) return;
+  C.splice(ci,1);
+  document.getElementById("sc").innerHTML=C.map(function(c,i){return "<option value='"+i+"'>"+c.name+"</option>";}).join("");
+  renderCL();
 }
 
-// עדכון toggle לשמור ב-Supabase
-const _origToggle = toggle;
-window.toggle = function(ci, wi, val) {
-  _origToggle(ci, wi, val);
-  const k = workerKey(ci, wi);
-  saveRow(k, state[k] || null, stateOk[k] || false);
-};
-
-const _origToggleOk = toggleOk;
-window.toggleOk = function(ci, wi) {
-  _origToggleOk(ci, wi);
-  const k = workerKey(ci, wi);
-  saveRow(k, state[k] || null, stateOk[k] || false);
-};
-
-function resetAll() {
-  if(!confirm('לאפס את כל הסימונים?')) return;
-  Object.keys(state).forEach(k => delete state[k]);
-  Object.keys(stateOk).forEach(k => delete stateOk[k]);
-  contractors.forEach((c,ci) => c.workers.forEach((_,wi) => renderWorkerRow(ci,wi)));
-  updateStats();
-  // מחיקת כל השורות ב-Supabase
-  fetch(`${SUPA_URL}/rest/v1/checkin?id=neq.PLACEHOLDER`, { method: 'DELETE', headers: {...HEADERS, 'Prefer': ''} })
-    .then(() => showMsg('✓ אופס','#166534','#4ade80','#22c55e'));
+function updClock() {
+  var n=new Date();
+  document.getElementById("dtm").innerHTML="<strong>"+n.toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"})+"</strong><br>"+n.toLocaleDateString("he-IL");
 }
 
 buildUI();
-updateClock();
-setInterval(updateClock, 10000);
+updClock();
+setInterval(updClock,10000);
+sbLoad(false);
+startRef();
 
-// טעינה ראשונית + רענון כל 10 שניות
-loadAllFromSupabase(false);
-window._refreshInterval = setInterval(() => loadAllFromSupabase(true), 10000);
-
-// ============================================================
-// ADMIN SYSTEM
-// ============================================================
-const ADMIN_PASSWORD = 'Liya262020';
-let pendingAdminAction = null;
-
-function askAdminPassword(action) {
-  pendingAdminAction = action;
-  document.getElementById('pwd-title').textContent = action === 'reset' ? '🔄 איפוס נתונים' : '⚙️ כניסה לניהול';
-  document.getElementById('pwd-input').value = '';
-  document.getElementById('pwd-error').style.display = 'none';
-  document.getElementById('pwd-modal').classList.add('open');
-  setTimeout(() => document.getElementById('pwd-input').focus(), 300);
-}
-
-function closePwdModal() {
-  document.getElementById('pwd-modal').classList.remove('open');
-  pendingAdminAction = null;
-}
-
-function checkPassword() {
-  const val = document.getElementById('pwd-input').value;
-  if (val === ADMIN_PASSWORD) {
-    closePwdModal();
-    if (pendingAdminAction === 'reset') doReset();
-    else if (pendingAdminAction === 'admin') openAdminPanel();
-  } else {
-    document.getElementById('pwd-error').style.display = 'block';
-    document.getElementById('pwd-input').value = '';
-    document.getElementById('pwd-input').focus();
-  }
-}
-
-function doReset() {
-  if(!confirm('לאפס את כל הסימונים?')) return;
-  Object.keys(state).forEach(k => delete state[k]);
-  Object.keys(stateOk).forEach(k => delete stateOk[k]);
-  contractors.forEach((c,ci) => c.workers.forEach((_,wi) => renderWorkerRow(ci,wi)));
-  updateStats();
-  fetch(`${SUPA_URL}/rest/v1/checkin?id=neq.PLACEHOLDER`, { method: 'DELETE', headers: {...HEADERS, 'Prefer': ''} })
-    .then(() => showMsg('✓ אופס','#166534','#4ade80','#22c55e'));
-}
-
-function openAdminPanel() {
-  const sel = document.getElementById('new-contractor');
-  sel.innerHTML = contractors.map((c,i) => `<option value="${i}">${c.name}</option>`).join('');
-  showAdminTab('workers', document.getElementById('tab-workers'));
-  document.getElementById('admin-modal').classList.add('open');
-  if(window._refreshInterval) clearInterval(window._refreshInterval);
-}
-
-function closeAdminModal() {
-  document.getElementById('admin-modal').classList.remove('open');
-  window._refreshInterval = setInterval(() => loadAllFromSupabase(true), 10000);
-  document.getElementById('contractors-container').innerHTML = '';
-  buildUI();
-  contractors.forEach((c,ci) => c.workers.forEach((_,wi) => renderWorkerRow(ci,wi)));
-  updateStats();
-  filterWorkers();
-}
-
-function showAdminTab(tab, btn) {
-  ['workers','add','contractor'].forEach(t => {
-    document.getElementById('admin-'+t).style.display = t===tab ? '' : 'none';
-  });
-  document.querySelectorAll('#admin-modal .filter-tab').forEach(b => b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  if(tab==='workers') renderAdminWorkers();
-  if(tab==='contractor') renderContractorList();
-}
-
-function renderAdminWorkers() {
-  const q = (document.getElementById('admin-search').value || '').toLowerCase();
-  let html = '';
-  contractors.forEach((c, ci) => {
-    const filtered = c.workers.map((w,wi)=>({w,wi})).filter(({w}) => !q || w.name.includes(q) || (w.phone||'').includes(q));
-    if (!filtered.length) return;
-    html += `<div style="font-size:11px;font-weight:700;color:${c.color};padding:8px 0 4px;border-bottom:1px solid #1e2d45">${c.name} (${c.workers.length})</div>`;
-    filtered.forEach(({w,wi}) => {
-      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1e2d45">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600">${w.name}</div>
-          <div style="font-size:11px;color:#64748b">${w.phone||'—'}${w.note?' | '+w.note:''}</div>
-        </div>
-        <button onclick="openEditWorker(${ci},${wi})" style="padding:6px 14px;background:#1e40af;color:white;border:none;border-radius:8px;font-family:Heebo,sans-serif;font-size:12px;cursor:pointer;flex-shrink:0">✏️ עריכה</button>
-      </div>`;
-    });
-  });
-  document.getElementById('admin-workers-list').innerHTML = html || '<div style="color:#64748b;text-align:center;padding:20px">לא נמצאו עובדים</div>';
-}
-
-function openEditWorker(ci, wi) {
-  const w = contractors[ci].workers[wi];
-  document.getElementById('edit-ci').value = ci;
-  document.getElementById('edit-wi').value = wi;
-  document.getElementById('edit-name').value = w.name;
-  document.getElementById('edit-phone').value = w.phone || '';
-  document.getElementById('edit-note').value = w.note || '';
-  document.getElementById('edit-modal').classList.add('open');
-}
-
-function saveEdit() {
-  const ci = parseInt(document.getElementById('edit-ci').value);
-  const wi = parseInt(document.getElementById('edit-wi').value);
-  contractors[ci].workers[wi].name = document.getElementById('edit-name').value.trim();
-  contractors[ci].workers[wi].phone = document.getElementById('edit-phone').value.trim();
-  contractors[ci].workers[wi].note = document.getElementById('edit-note').value.trim();
-  document.getElementById('edit-modal').classList.remove('open');
-  renderAdminWorkers();
-  showMsg('✓ נשמר','#166534','#4ade80','#22c55e');
-}
-
-function deleteWorker() {
-  const ci = parseInt(document.getElementById('edit-ci').value);
-  const wi = parseInt(document.getElementById('edit-wi').value);
-  const name = contractors[ci].workers[wi].name;
-  if(!confirm(`למחוק את ${name}?`)) return;
-  contractors[ci].workers.splice(wi, 1);
-  document.getElementById('edit-modal').classList.remove('open');
-  renderAdminWorkers();
-  showMsg('🗑 נמחק','#7f1d1d','#fca5a5','#ef4444');
-}
-
-function addWorker() {
-  const ci = parseInt(document.getElementById('new-contractor').value);
-  const name = document.getElementById('new-name').value.trim();
-  const phone = document.getElementById('new-phone').value.trim();
-  const note = document.getElementById('new-note').value.trim();
-  const msg = document.getElementById('add-msg');
-  if (!name) {
-    msg.style.display='block'; msg.style.color='#ef4444';
-    msg.textContent='⚠ נא להזין שם'; return;
-  }
-  contractors[ci].workers.push({ name, phone, note });
-  document.getElementById('new-name').value = '';
-  document.getElementById('new-phone').value = '';
-  document.getElementById('new-note').value = '';
-  msg.style.display='block'; msg.style.color='#4ade80';
-  msg.textContent=`✓ ${name} נוסף ל${contractors[ci].name}`;
-  setTimeout(() => msg.style.display='none', 3000);
-}
-
-function renderContractorList() {
-  let html = '';
-  contractors.forEach((c, ci) => {
-    html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1e2d45">
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:12px;height:12px;border-radius:50%;background:${c.color};flex-shrink:0"></div>
-        <div>
-          <div style="font-size:13px;font-weight:600">${c.name}</div>
-          <div style="font-size:11px;color:#64748b">${c.workers.length} עובדים</div>
-        </div>
-      </div>
-      <button onclick="deleteContractor(${ci})" style="padding:6px 12px;background:#7f1d1d;color:#fca5a5;border:none;border-radius:8px;font-family:Heebo,sans-serif;font-size:12px;cursor:pointer">🗑</button>
-    </div>`;
-  });
-  document.getElementById('contractor-list').innerHTML = html;
-}
-
-function addContractor() {
-  const name = document.getElementById('new-contractor-name').value.trim();
-  if (!name) return;
-  const colors = ["1E40AF","15803D","7C3AED","B45309","DC2626","0891B2","9D174D","475569","064E3B"];
-  contractors.push({ name, color: '#' + colors[contractors.length % colors.length], workers: [] });
-  document.getElementById('new-contractor-name').value = '';
-  document.getElementById('new-contractor').innerHTML = contractors.map((c,i) => `<option value="${i}">${c.name}</option>`).join('');
-  renderContractorList();
-  showMsg(`✓ ${name} נוסף`,'#166534','#4ade80','#22c55e');
-}
-
-function deleteContractor(ci) {
-  if (!confirm(`למחוק את "${contractors[ci].name}" וכל עובדיו?`)) return;
-  contractors.splice(ci, 1);
-  renderContractorList();
-  document.getElementById('new-contractor').innerHTML = contractors.map((c,i) => `<option value="${i}">${c.name}</option>`).join('');
-  showMsg('🗑 נמחק','#7f1d1d','#fca5a5','#ef4444');
-}
 </script>
 </body>
 </html>
